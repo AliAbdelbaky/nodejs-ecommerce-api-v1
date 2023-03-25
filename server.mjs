@@ -12,9 +12,12 @@ mongoose.connect(process.env.DB_URI).then((conn) => {
     console.error(err)
     process.exit(1)
 })
+
+//- express app
 const app = Express();
 
-
+//- Middlewares
+app.use(Express.json())
 if (process.env.NODE_ENV === 'development') app.use(morgan('dev'))
 
 
