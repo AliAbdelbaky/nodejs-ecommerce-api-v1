@@ -6,7 +6,7 @@ const asyncHandler = require('express-async-handler')
 
 exports.getCategory = asyncHandler(async (req, res) => {
     const data = await CategoryModel.find({})
-    res.status(200).json({ data })
+    res.status(200).json({ total: data.length, data })
 })
 
 
