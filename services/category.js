@@ -1,15 +1,18 @@
 const CategoryModel = require('../models/category.model')
-exports.createCategory = (req, res) => {
+const slugify = require('slugify')
+
+const asyncHandler = require('express-async-handler')
+
+
+exports.getCategory = asyncHandler(async (req, res) => {
+    const data = await CategoryModel.find({})
+    res.status(200).json({ data })
+})
+
+
+exports.createCategory = asyncHandler(async (req, res) => {
     const name = req.body.name
-    console.log(name)
 
-    const newCategory = new CategoryModel({ name })
-    newCategory.save()
-        .then((doc) => {
-            res.json(doc)
-        })
-        .catch(err => res.json(err))
-
-}
-
-
+    const doc = await CategoryModel.create({ name, slug: slugify(name) })
+    res.status(201).json({ data: doc })
+})

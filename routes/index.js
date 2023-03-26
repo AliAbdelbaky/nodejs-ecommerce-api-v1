@@ -1,4 +1,7 @@
 const categoryRouter = require('./categoryRoute')
+const baseName = process.env.BASE_ROUTE_NAME
+
+
 
 const initRoutes = (app) => {
     app.get('/', (req, res) => {
@@ -6,7 +9,7 @@ const initRoutes = (app) => {
             Hello: true
         })
     })
-    app.use('api/v1/category', categoryRouter)
+    app.use(`${baseName}/category`, categoryRouter)
 }
 
 module.exports = initRoutes
