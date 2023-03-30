@@ -1,6 +1,6 @@
 const categoryRouter = require('./categoryRoute')
 const baseName = process.env.BASE_ROUTE_NAME
-const apiError = require('../middleware/apiError')
+const apiError = require('../middleware/errorMiddleware')
 
 
 
