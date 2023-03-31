@@ -6,26 +6,18 @@ const apiError = (app) => {
     app.use((error, req, res, next) => {
         error.statusCode = error.statusCode || 500
         error.status = error.status || 'error'
+        res.status(400).json(response(error))
+    })
+}
+const response = (error) => {
+    let DEFUALT_RES = {
+        status: error.status,
+        message: error.message,
+    }
+    if (process.env.NODE_ENV === 'development') {
+        DEFUALT_RES = Object.assign({ error, stack: error.stack }, DEFUALT_RES)
+    }
 
-        if (process.env.NODE_ENV === 'development') {
-            sendForDev(error, res)
-        } else {
-            sendForProd(error, res)
-        }
-    })
-}
-const sendForProd = (error, res) => {
-    return res.status(400).json({
-        status: error.status,
-        message: error.message,
-    })
-}
-const sendForDev = (error, res) => {
-    return res.status(400).json({
-        status: error.status,
-        error,
-        message: error.message,
-        stack: error.stack
-    })
+    return DEFUALT_RES
 }
 module.exports = apiError

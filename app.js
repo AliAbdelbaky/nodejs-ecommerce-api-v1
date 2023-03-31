@@ -9,11 +9,11 @@ dbConnection()
 
 //- express app
 const app = express();
-
-
 if (process.env.NODE_ENV === 'development') app.use(morgan('dev'))
-
 app.use(express.json())
+
+
+
 
 
 
@@ -27,7 +27,18 @@ initRoutes(app)
 const errorMiddleware = require('./middleware/errorMiddleware')
 errorMiddleware(app)
 
+
+// initalize server
 const PORT = process.env.PORT
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
     console.log(`App runing on http://localhost:${PORT}`)
+})
+
+
+// handel rejection outside express
+process.on('unhandledRejection', (error) => {
+    server.close(() => {
+        console.error(`unhandledRejection error: ${error.name} | ${error.message}`)
+        process.exit(1)
+    })
 })
