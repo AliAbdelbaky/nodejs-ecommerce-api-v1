@@ -1,6 +1,6 @@
 const categoryRouter = require('./categoryRoute')
 const baseName = process.env.BASE_ROUTE_NAME
-const apiError = require('../middleware/errorMiddleware')
+
 
 
 
@@ -11,8 +11,6 @@ const initRoutes = (app) => {
         })
     })
     app.use(`${baseName}/category`, categoryRouter)
-
-    apiError(app)
 }
 
 module.exports = initRoutes

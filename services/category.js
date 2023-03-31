@@ -16,11 +16,11 @@ exports.getCategories = asyncHandler(async (req, res) => {
 exports.getCategory = asyncHandler(async (req, res, next) => {
     const { id } = req.params
     const data = await CategoryModel.findById(id)
-    if (!data) {
+    if (data === null) {
         next(new ApiError(`No category for this id ${id}`, 404))
+        return
     }
     res.status(200).json({ data })
-
 })
 
 
@@ -36,7 +36,7 @@ exports.updateCategory = asyncHandler(async (req, res, next) => {
     const { name } = req.body
 
     const data = await CategoryModel.findOneAndUpdate({ _id: id }, { name, slug: slugify(name) }, { new: true })
-    if (!data) {
+    if (data === null) {
         next(new ApiError(`No category for this id ${id}`, 404))
     }
     res.status(200).json({ data })
@@ -45,7 +45,7 @@ exports.updateCategory = asyncHandler(async (req, res, next) => {
 exports.deleteCategory = asyncHandler(async (req, res, next) => {
     const { id } = req.params
     const data = await CategoryModel.findByIdAndDelete(id)
-    if (!data) {
+    if (data === null) {
         next(new ApiError(`No category for this id ${id}`, 404))
     }
     res.status(200).json({ msg: 'deleted sucssefully', data })

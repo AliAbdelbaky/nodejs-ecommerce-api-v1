@@ -1,8 +1,8 @@
-// const express = require('express')
 const express = require('express')
 const dotenv = require('dotenv');
+const morgan = require('morgan');
 
-dotenv.config({ path: "config.env" })
+dotenv.config({ path: ".env" })
 //- connect to DB
 const dbConnection = require('./config/database')
 dbConnection()
@@ -10,9 +10,11 @@ dbConnection()
 //- express app
 const app = express();
 
-//- Middlewares
-const initMiddleware = require('./middleware/index')
-initMiddleware(app)
+
+if (process.env.NODE_ENV === 'development') app.use(morgan('dev'))
+
+app.use(express.json())
+
 
 
 
@@ -20,6 +22,10 @@ initMiddleware(app)
 const initRoutes = require('./routes/index')
 initRoutes(app)
 
+
+//- Middlewares
+const errorMiddleware = require('./middleware/errorMiddleware')
+errorMiddleware(app)
 
 const PORT = process.env.PORT
 app.listen(PORT, () => {
