@@ -8,7 +8,8 @@ const {
     deleteCategory
 } = require('../../services/category')
 
-const { getCategoryValidator,
+const {
+    getCategoryValidator,
     createCategoryValidator,
     updateCategoryValidator,
     deleteCategoryValidator
