@@ -7,14 +7,14 @@ const {
     deleteSubCategory,
     updateSubCategory,
     setCategoryIdToBody
-} = require('../services/subcategory')
+} = require('../../services/subcategory')
 
 const {
     createSubCategoryValidator,
     getSubCategoryValidator,
     updateSubCategoryValidator,
     deleteSubCategoryValidator
-} = require('../utils/validators/subcategory')
+} = require('../../utils/validators/subcategory')
 
 const router = express.Router({ mergeParams: true })
 

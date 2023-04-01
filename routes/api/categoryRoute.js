@@ -6,13 +6,13 @@ const {
     getCategory,
     updateCategory,
     deleteCategory
-} = require('../services/category')
+} = require('../../services/category')
 
 const { getCategoryValidator,
     createCategoryValidator,
     updateCategoryValidator,
     deleteCategoryValidator
-} = require('../utils/validators/category')
+} = require('../../utils/validators/category')
 
 const subCategoryRoute = require('./subcategoryRoute')
 
