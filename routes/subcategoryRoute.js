@@ -1,13 +1,12 @@
 const express = require('express')
 
-const router = express.Router()
-// eslint-disable-next-line 
 const {
     createSubCategory,
     getSubCategories,
     getSubCategory,
     deleteSubCategory,
-    updateSubCategory
+    updateSubCategory,
+    setCategoryIdToBody
 } = require('../services/subcategory')
 
 const {
@@ -17,11 +16,12 @@ const {
     deleteSubCategoryValidator
 } = require('../utils/validators/subcategory')
 
+const router = express.Router({ mergeParams: true })
 
 router
     .route('/')
     .get(getSubCategories)
-    .post(createSubCategoryValidator, createSubCategory)
+    .post(setCategoryIdToBody, createSubCategoryValidator, createSubCategory)
 
 router
     .route('/:id')
