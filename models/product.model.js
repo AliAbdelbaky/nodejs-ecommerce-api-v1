@@ -33,7 +33,7 @@ const productSchema = new mongoose.Schema({
         trim: true,
         max: [100, 'Too long Product Price']
     },
-    price_discount: {
+    priceDiscount: {
         type: Number,
     },
     colors: [String],
@@ -48,7 +48,7 @@ const productSchema = new mongoose.Schema({
         min: [0, ' rating must be greater than or equal to 0'],
         max: [5, ' rating must be lower than or equal to 5']
     },
-    rating_quantity: {
+    ratingQuantity: {
         type: Number,
         default: 0,
     },
