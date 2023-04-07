@@ -1,5 +1,7 @@
 const { check } = require('express-validator')
 const validatorMiddleware = require('../../middleware/validatorMiddleware')
+const Category = require('../../models/category.model')
+const SubCategory = require('../../models/subCategory.model')
 
 const getProductValidator = [
     check('id')
@@ -107,13 +109,38 @@ const createProductValidator = [
         .notEmpty()
         .withMessage('category is required')
         .isMongoId()
-        .withMessage('Invalid Category id'),
+        .withMessage('Invalid Category id')
+        .custom(async (categoryId) => {
+            const data = await Category.findById(categoryId)
+            if (!data) {
+                throw new Error(`There is no Category for this id: ${categoryId}`);
+            }
+            return true
+        })
+    ,
 
 
     check('subcategory')
         .optional()
         .isMongoId()
-        .withMessage('Invalid subcategory id'),
+        .withMessage('Invalid subcategory id')
+        .custom(async (subIds) => {
+            const data = await SubCategory.find({ _id: { $exists: true, $in: subIds } })
+            if (!data.length || data.length !== subIds.length) {
+                throw new Error(`There is no subcategory for this ids: ${subIds}`);
+            }
+            return true
+        })
+        .custom(async (value, { req }) => {
+            const data = await SubCategory.find({ category: req.body.category })
+            const subsIdsDB = data.map(sub => sub._id.toString())
+            const checker = value.every(v => subsIdsDB.includes(v))
+            if (!checker) {
+                throw new Error('subcategory not belong to category')
+            }
+            return true
+        })
+    ,
 
     check('brand')
         .optional()
