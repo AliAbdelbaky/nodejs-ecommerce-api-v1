@@ -16,8 +16,10 @@ const getProductsList = asyncHandler(async (req, res) => {
     const excludeFields = ['page', 'limit', 'sort', 'fields']
     excludeFields.forEach(field => delete queries[field])
 
-    const queryStr = JSON.parse(JSON.stringify(queries)
-        .replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}`))
+    const queryStr = JSON.parse(
+        JSON.stringify(queries)
+            .replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}`)
+    )
 
     const page = req.query.page * 1 || 1
     const limit = req.query.limit * 1 || 5;
