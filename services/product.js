@@ -12,10 +12,28 @@ const getProduct = asyncHandler(async (req, res, next) => {
     res.status(200).json({ data })
 })
 const getProductsList = asyncHandler(async (req, res) => {
+    const queries = { ...req.query }
+    const excludeFields = ['page', 'limit', 'sort', 'fields']
+    excludeFields.forEach(field => delete queries[field])
+
+    const queryStr = JSON.parse(JSON.stringify(queries)
+        .replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}`))
+
     const page = req.query.page * 1 || 1
     const limit = req.query.limit * 1 || 5;
     const skip = (page - 1) * limit
-    const data = await Product.find({}).limit(limit).skip(skip).populate({ path: 'category', select: 'name' })
+
+
+
+
+    const mongooseQuery = Product.find(queryStr)
+        .limit(limit)
+        .skip(skip)
+        .populate({ path: 'category', select: 'name' })
+
+    const data = await mongooseQuery
+
+
     res.status(200).json({ page, limit, total: data.length, data })
 })
 

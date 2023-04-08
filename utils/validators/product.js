@@ -85,14 +85,14 @@ const createProductValidator = [
         .withMessage('colors should be an array of images'),
 
 
-    check('rating')
+    check('ratingAvarage')
         // .optional()
         .notEmpty()
-        .withMessage('rating is required')
+        .withMessage('ratingAvarage is required')
         .isNumeric()
-        .withMessage('rating must be a number')
+        .withMessage('ratingAvarage must be a number')
         .isLength({ min: 1, max: 5 })
-        .withMessage('rating must be a numbesssss')
+        .withMessage('ratingAvarage must be a numbesssss')
     // .toFloat()
     ,
 
