@@ -33,6 +33,20 @@ const getProductsList = asyncHandler(async (req, res) => {
         .skip(skip)
         .populate({ path: 'category', select: 'name' })
 
+    if (req.query.sort) {
+        const sortBy = req.query.sort.split(',').join(' ')
+        mongooseQuery.sort(sortBy)
+    }
+    if (req.query.fields) {
+        const fields = req.query.fields.split(',').join(' ')
+        mongooseQuery.select(fields)
+    }
+    // fix search 
+    // if (req.query.search) {
+    //     const query = {}
+    //     query.$or = [{ title: { $regex: req.query.search, $options: "i" } }, { description: { $regex: req.query.search, $options: "i" } }]
+    //     mongooseQuery.find(query)
+    // }
     const data = await mongooseQuery
 
 
