@@ -2,6 +2,8 @@ const slugify = require('slugify');
 const asyncHandler = require('express-async-handler');
 const Brand = require('../models/brand.model');
 const ApiError = require('../utils/apiError');
+const ApiFeatures = require('../utils/apiFeatures')
+const factory = require('./handlersFactory')
 
 const getBrand = asyncHandler(async (req, res, next) => {
     const { id } = req.params
@@ -12,11 +14,19 @@ const getBrand = asyncHandler(async (req, res, next) => {
     res.status(200).json({ data })
 })
 const getBrandsList = asyncHandler(async (req, res) => {
-    const page = req.query.page * 1 || 1
-    const limit = req.query.limit * 1 || 5;
-    const skip = (page - 1) * limit
-    const data = await Brand.find({}).limit(limit).skip(skip)
-    res.status(200).json({ page, limit, total: data.length, data })
+    const totalDocuments = await Brand.countDocuments()
+
+    const apiFeatures = new ApiFeatures(Brand.find(), req.query)
+        .paginate(totalDocuments)
+        .filter()
+        .search()
+        .limitFields()
+        .sort()
+
+
+    const { mongooseQuery, paginationResult } = apiFeatures
+    const data = await mongooseQuery
+    res.status(200).json({ paginationResult, result: data.length, total: totalDocuments, data })
 })
 
 const createBrand = asyncHandler(async (req, res) => {
@@ -36,14 +46,7 @@ const updateBrand = asyncHandler(async (req, res, next) => {
     res.status(200).json({ data })
 })
 
-const deleteBrand = asyncHandler(async (req, res, next) => {
-    const { id } = req.params;
-    const data = await Brand.findByIdAndDelete({ _id: id })
-    if (data === null) {
-        next(new ApiError(`No brand for this id ${id}`, 404))
-    }
-    res.status(200).json({ data, msg: 'brand deleted sucssefuly' })
-})
+const deleteBrand = factory.deleteOne(Brand)
 
 module.exports = {
     getBrand,
