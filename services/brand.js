@@ -1,5 +1,5 @@
+const factory = require('../utils/handlersFactory')
 const Brand = require('../models/brand.model');
-const factory = require('./handlersFactory')
 
 
 // @desc    Get list of brands

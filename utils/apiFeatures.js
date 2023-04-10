@@ -79,10 +79,5 @@ class ApiFeatures {
         this.paginationResult = pagination
         return this
     }
-
-    populate(payload) {
-        this.mongooseQuery = this.mongooseQuery.populate(payload)
-        return this
-    }
 }
 module.exports = ApiFeatures;

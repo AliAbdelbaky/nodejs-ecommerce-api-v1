@@ -1,5 +1,5 @@
+const factory = require('../utils/handlersFactory')
 const Product = require('../models/product.model');
-const factory = require('./handlersFactory')
 
 
 // @desc    Get specific product by id
@@ -10,7 +10,7 @@ const getProduct = factory.getOne(Product)
 // @desc    Get list of products
 // @route   GET /api/v1/products
 // @access  Public
-const getProductsList = factory.getAll(Product)
+const getProductsList = factory.getAll(Product, 'Products')
 
 // @desc    Create product
 // @route   POST  /api/v1/products

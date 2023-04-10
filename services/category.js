@@ -1,5 +1,5 @@
+const factory = require('../utils/handlersFactory')
 const CategoryModel = require('../models/category.model')
-const factory = require('./handlersFactory')
 
 
 // @desc    Get list of categories

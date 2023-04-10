@@ -1,5 +1,11 @@
+const factory = require('../utils/handlersFactory')
 const SubCategoryModel = require('../models/subCategory.model')
-const factory = require('./handlersFactory')
+
+
+
+// Nested route
+// GET /api/v1/categories/:categoryId/subcategories
+
 
 // @desc    Get specific subcategory by id
 // @route   GET /api/v1/subcategories/:id

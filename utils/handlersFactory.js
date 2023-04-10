@@ -1,6 +1,6 @@
 const asyncHandler = require('express-async-handler');
-const ApiError = require('../utils/apiError');
-const ApiFeatures = require('../utils/apiFeatures')
+const ApiError = require('./apiError');
+const ApiFeatures = require('./apiFeatures')
 
 const deleteOne = Model => asyncHandler(async (req, res, next) => {
     const { id } = req.params;
@@ -38,20 +38,20 @@ const getOne = Model => asyncHandler(async (req, res, next) => {
     res.status(200).json({ data: document })
 })
 
-const getAll = Model => asyncHandler(async (req, res) => {
+const getAll = (Model, modelname = '') => asyncHandler(async (req, res) => {
     const totalDocuments = await Model.countDocuments()
 
-    const apiFeatures = new ApiFeatures(Model.find(), req.query)
+    const apiFeatures = new ApiFeatures(Model.find(req.filterObj || {}), req.query)
         .paginate(totalDocuments)
         .filter()
-        .search()
+        .search(modelname)
         .limitFields()
         .sort()
 
 
     const { mongooseQuery, paginationResult } = apiFeatures
     const data = await mongooseQuery
-    
+
     res.status(200).json({ paginationResult, result: data.length, total: totalDocuments, data })
 })
 

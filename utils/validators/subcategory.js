@@ -16,10 +16,23 @@ exports.createSubCategoryValidator = [
         })
     ,
     check('category')
-        .notEmpty()
-        .withMessage('category is required')
+        .optional()
+        .custom((value, { req }) => {
+            req.body.category = value
+            return true
+        })
         .isMongoId()
-        .withMessage('invalid category id format'),
+        .withMessage('invalid category id format')
+    ,
+    check('categoryId')
+        .optional()
+        .custom((value, { req }) => {
+            req.body.category = value
+            return true
+        })
+        .isMongoId()
+        .withMessage('invalid category id format')
+    ,
     validatorMiddleware
 ]
 
@@ -29,14 +42,19 @@ exports.getSubCategoryValidator = [
         .withMessage('Sub category id is required')
         .isMongoId()
         .withMessage('Invalid category id'),
-    check('category')
+    validatorMiddleware
+]
+exports.getSubCategoriesValidator = [
+    check('categoryId')
         .optional()
         .isMongoId()
         .withMessage('invalid category id format')
         .custom((val, { req }) => {
-            if (!val) req.body.category = req.params.categoryId
-        })
-    ,
+            console.log('val', val)
+            req.filterObj = { category: val }
+            return true
+            // if (!val) req.body.category = req.params.categoryId
+        }),
     validatorMiddleware
 ]
 
