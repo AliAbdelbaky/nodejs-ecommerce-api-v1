@@ -1,64 +1,29 @@
-
-const slugify = require('slugify')
-
-const asyncHandler = require('express-async-handler')
 const SubCategoryModel = require('../models/subCategory.model')
-const ApiError = require('../utils/apiError')
-const ApiFeatures = require('../utils/apiFeatures')
 const factory = require('./handlersFactory')
 
-const setCategoryIdToBody = (req, res, next) => {
-    if (!req.body.category) req.body.category = req.params.categoryId
-    next()
-}
+// @desc    Get specific subcategory by id
+// @route   GET /api/v1/subcategories/:id
+// @access  Public
+const getSubCategory = factory.getOne(SubCategoryModel)
 
-const createSubCategory = asyncHandler(async (req, res) => {
+// @desc    Get list of subcategories
+// @route   GET /api/v1/subcategories
+// @access  Public
+const getSubCategories = factory.getAll(SubCategoryModel)
 
-    const { name, category } = req.body
+// @desc    Create subCategory
+// @route   POST  /api/v1/subcategories
+// @access  Private
+const createSubCategory = factory.createOne(SubCategoryModel)
 
-    const doc = await SubCategoryModel
-        .create(
-            {
-                name,
-                slug: slugify(name),
-                category
-            }
-        )
-    res.status(201).json({ data: doc })
-})
-const getSubCategories = asyncHandler(async (req, res) => {
-
-    const totalDocuments = await SubCategoryModel.countDocuments()
-
-    const apiFeatures = new ApiFeatures(SubCategoryModel.find(), req.query)
-        .paginate(totalDocuments)
-        .filter()
-        .search()
-        .limitFields()
-        .sort()
-        .populate({ path: 'category', select: 'name' })
-
-
-    const { mongooseQuery, paginationResult } = apiFeatures
-    const data = await mongooseQuery
-    res.status(200).json({ paginationResult, result: data.length, total: totalDocuments, data })
-
-})
-
-
-
-const getSubCategory = asyncHandler(async (req, res, next) => {
-    const { id } = req.params
-    const data = await SubCategoryModel.findById(id)
-    if (data === null) {
-        next(new ApiError(`No category for this id ${id}`, 404))
-        return
-    }
-    res.status(200).json({ data })
-})
-
+// @desc    Update specific subcategory
+// @route   PUT /api/v1/subcategories/:id
+// @access  Private
 const updateSubCategory = factory.updateOne(SubCategoryModel)
 
+// @desc    Delete specific subCategory
+// @route   DELETE /api/v1/subcategories/:id
+// @access  Private
 const deleteSubCategory = factory.deleteOne(SubCategoryModel)
 
 module.exports = {
@@ -67,5 +32,4 @@ module.exports = {
     getSubCategory,
     updateSubCategory,
     deleteSubCategory,
-    setCategoryIdToBody
 }

@@ -1,50 +1,30 @@
-
-const slugify = require('slugify')
-
-const asyncHandler = require('express-async-handler')
 const CategoryModel = require('../models/category.model')
-const ApiError = require('../utils/apiError')
-const ApiFeatures = require('../utils/apiFeatures')
 const factory = require('./handlersFactory')
 
-const getCategories = asyncHandler(async (req, res) => {
-    const totalDocuments = await CategoryModel.countDocuments()
 
-    const apiFeatures = new ApiFeatures(CategoryModel.find(), req.query)
-        .paginate(totalDocuments)
-        .filter()
-        .search()
-        .limitFields()
-        .sort()
+// @desc    Get list of categories
+// @route   GET /api/v1/categories
+// @access  Public
+const getCategories = factory.getAll(CategoryModel)
 
+// @desc    Get specific category by id
+// @route   GET /api/v1/categories/:id
+// @access  Public
+const getCategory = factory.getOne(CategoryModel)
 
-    const { mongooseQuery, paginationResult } = apiFeatures
-    const data = await mongooseQuery
-    res.status(200).json({ paginationResult, result: data.length, total: totalDocuments, data })
+// @desc    Create category
+// @route   POST  /api/v1/categories
+// @access  Private
+const createCategory = factory.createOne(CategoryModel)
 
-
-})
-
-const getCategory = asyncHandler(async (req, res, next) => {
-    const { id } = req.params
-    const data = await CategoryModel.findById(id)
-    if (data === null) {
-        next(new ApiError(`No category for this id ${id}`, 404))
-        return
-    }
-    res.status(200).json({ data })
-})
-
-
-const createCategory = asyncHandler(async (req, res) => {
-    const { name } = req.body
-
-    const doc = await CategoryModel.create({ name, slug: slugify(name) })
-    res.status(201).json({ data: doc })
-})
-
+// @desc    Update specific category
+// @route   PUT /api/v1/categories/:id
+// @access  Private
 const updateCategory = factory.updateOne(CategoryModel)
 
+// @desc    Delete specific category
+// @route   DELETE /api/v1/categories/:id
+// @access  Private
 const deleteCategory = factory.deleteOne(CategoryModel)
 
 module.exports = {

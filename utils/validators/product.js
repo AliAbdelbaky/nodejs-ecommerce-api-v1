@@ -20,7 +20,12 @@ const createProductValidator = [
         .isLength({ min: 3 })
         .withMessage('Title must be at least 3 characters long')
         .isLength({ max: 100 })
-        .withMessage('Title must be less than 32 characters long'),
+        .withMessage('Title must be less than 32 characters long')
+        .custom((value, { req }) => {
+            req.body.slug = slugify(value)
+            return true
+        })
+        ,
 
 
     check('description')

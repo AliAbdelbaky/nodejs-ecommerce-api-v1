@@ -1,42 +1,30 @@
-const slugify = require('slugify');
-const asyncHandler = require('express-async-handler');
 const Brand = require('../models/brand.model');
-const ApiError = require('../utils/apiError');
-const ApiFeatures = require('../utils/apiFeatures')
 const factory = require('./handlersFactory')
 
-const getBrand = asyncHandler(async (req, res, next) => {
-    const { id } = req.params
-    const data = await Brand.findById(id)
-    if (!data) {
-        next(new ApiError(`No brand found for id  ${id}`, 404))
-    }
-    res.status(200).json({ data })
-})
-const getBrandsList = asyncHandler(async (req, res) => {
-    const totalDocuments = await Brand.countDocuments()
 
-    const apiFeatures = new ApiFeatures(Brand.find(), req.query)
-        .paginate(totalDocuments)
-        .filter()
-        .search()
-        .limitFields()
-        .sort()
+// @desc    Get list of brands
+// @route   GET /api/v1/brands
+// @access  Public
+const getBrandsList = factory.getAll(Brand)
 
+// @desc    Get specific brand by id
+// @route   GET /api/v1/brands/:id
+// @access  Public
+const getBrand = factory.getOne(Brand)
 
-    const { mongooseQuery, paginationResult } = apiFeatures
-    const data = await mongooseQuery
-    res.status(200).json({ paginationResult, result: data.length, total: totalDocuments, data })
-})
+// @desc    Create brand
+// @route   POST  /api/v1/brands
+// @access  Private
+const createBrand = factory.createOne(Brand)
 
-const createBrand = asyncHandler(async (req, res) => {
-    const { name } = req.body;
-    const data = await Brand.create({ name, slug: slugify(name) })
-    res.status(201).json({ data })
-})
-
+// @desc    Update specific brand
+// @route   PUT /api/v1/brands/:id
+// @access  Private
 const updateBrand = factory.updateOne(Brand)
 
+// @desc    Delete specific brand
+// @route   DELETE /api/v1/brands/:id
+// @access  Private
 const deleteBrand = factory.deleteOne(Brand)
 
 module.exports = {

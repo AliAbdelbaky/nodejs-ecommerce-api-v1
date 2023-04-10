@@ -18,7 +18,12 @@ const createBrandValidator = [
         .isLength({ min: 3 })
         .withMessage('Name must be at least 3 characters long')
         .isLength({ max: 32 })
-        .withMessage('Name must be less than 32 characters long'),
+        .withMessage('Name must be less than 32 characters long')
+        .custom((value, { req }) => {
+            req.body.slug = slugify(value)
+            return true
+        })
+        ,
     validatorMiddleware
 ]
 const updateBrandValidator = [

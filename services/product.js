@@ -1,50 +1,30 @@
-const slugify = require('slugify');
-const asyncHandler = require('express-async-handler');
 const Product = require('../models/product.model');
-const ApiError = require('../utils/apiError');
-const ApiFeatures = require('../utils/apiFeatures')
 const factory = require('./handlersFactory')
 
 
+// @desc    Get specific product by id
+// @route   GET /api/v1/products/:id
+// @access  Public
+const getProduct = factory.getOne(Product)
 
-const getProduct = asyncHandler(async (req, res, next) => {
-    const { id } = req.params
-    const data = await Product.findById(id).populate({ path: 'category', select: 'name' })
-    if (!data) {
-        next(new ApiError(`No Product found for id  ${id}`, 404))
-    }
-    res.status(200).json({ data })
-})
-const getProductsList = asyncHandler(async (req, res) => {
+// @desc    Get list of products
+// @route   GET /api/v1/products
+// @access  Public
+const getProductsList = factory.getAll(Product)
 
-    const totalDocuments = await Product.countDocuments()
+// @desc    Create product
+// @route   POST  /api/v1/products
+// @access  Private
+const createProduct = factory.createOne(Product)
 
-    const apiFeatures = new ApiFeatures(Product.find(), req.query)
-        .paginate(totalDocuments)
-        .filter()
-        .search('Products')
-        .limitFields()
-        .sort()
-        .populate({ path: 'category', select: 'name' })
-
-
-    const { mongooseQuery, paginationResult } = apiFeatures
-    const data = await mongooseQuery
-
-
-    res.status(200).json({ paginationResult, total: totalDocuments, results: data.length, data })
-
-
-})
-
-const createProduct = asyncHandler(async (req, res) => {
-    req.body.slug = slugify(req.body.title)
-    const data = await Product.create(req.body)
-    res.status(201).json({ data })
-})
-
+// @desc    Update specific product
+// @route   PUT /api/v1/products/:id
+// @access  Private
 const updateProduct = factory.updateOne(Product)
 
+// @desc    Delete specific product
+// @route   DELETE /api/v1/products/:id
+// @access  Private
 const deleteProduct = factory.deleteOne(Product)
 
 module.exports = {

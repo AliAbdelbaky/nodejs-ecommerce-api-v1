@@ -9,7 +9,12 @@ exports.createSubCategoryValidator = [
         .isLength({ min: 2 })
         .withMessage('Too short name')
         .isLength({ max: 32 })
-        .withMessage('Too long name'),
+        .withMessage('Too long name')
+        .custom((value, { req }) => {
+            req.body.slug = slugify(value)
+            return true
+        })
+    ,
     check('category')
         .notEmpty()
         .withMessage('category is required')
@@ -24,6 +29,14 @@ exports.getSubCategoryValidator = [
         .withMessage('Sub category id is required')
         .isMongoId()
         .withMessage('Invalid category id'),
+    check('category')
+        .optional()
+        .isMongoId()
+        .withMessage('invalid category id format')
+        .custom((val, { req }) => {
+            if (!val) req.body.category = req.params.categoryId
+        })
+    ,
     validatorMiddleware
 ]
 
@@ -47,7 +60,7 @@ exports.updateSubCategoryValidator = [
             req.body.slug = slugify(value)
             return true
         })
-        ,
+    ,
     validatorMiddleware
 ]
 
