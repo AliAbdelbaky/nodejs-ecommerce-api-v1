@@ -1,3 +1,6 @@
+const path = require('path');
+
+require('colors')
 const express = require('express')
 const dotenv = require('dotenv');
 const morgan = require('morgan');
@@ -12,6 +15,7 @@ dbConnection()
 const app = express();
 if (process.env.NODE_ENV === 'development') app.use(morgan('dev'))
 app.use(express.json())
+app.use(express.static(path.join(__dirname, 'uploads')))
 
 
 
@@ -35,7 +39,7 @@ errorMiddleware(app)
 const { PORT } = process.env
 
 const server = app.listen(PORT, () => {
-    console.log(`App runing on http://localhost:${PORT}`)
+    console.log(`Server running ✅✅`.grey, `http://localhost:${PORT}`.underline.blue)
 })
 
 

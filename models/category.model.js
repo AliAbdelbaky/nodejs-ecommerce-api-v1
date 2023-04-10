@@ -12,8 +12,23 @@ const catSchema = new mongoose.Schema({
         type: String,
         lowercase: true
     },
-    image: String
+    image: {
+        type: String,
+        required: [true, 'Image required'],
+    }
 }, { timestamps: true })
+
+const setImgURL = (doc) => {
+    // return image base url + image name
+    if (doc.image) {
+        const imageURL = `${process.env.BASE_URL}/category/${doc.image}`
+        doc.image = imageURL
+    }
+}
+catSchema.post('init', (doc) => {setImgURL(doc)})
+catSchema.post('save', (doc) => {setImgURL(doc)})
+
+
 
 const catModel = mongoose.model('Category', catSchema)
 

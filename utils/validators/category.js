@@ -24,7 +24,11 @@ exports.createCategoryValidator = [
             req.body.slug = slugify(value)
             return true
         })
-        ,
+    ,
+    check('image')
+        .notEmpty()
+        .withMessage('image is required')
+    ,
     validatorMiddleware
 ]
 exports.updateCategoryValidator = [
@@ -32,6 +36,7 @@ exports.updateCategoryValidator = [
         .isMongoId()
         .withMessage('Invalid category id'),
     check('name')
+        .optional()
         .notEmpty()
         .withMessage('category name is required')
         .isLength({ min: 3 })
@@ -42,6 +47,11 @@ exports.updateCategoryValidator = [
             req.body.slug = slugify(value)
             return true
         }),
+    check('image')
+        .optional()
+        .notEmpty()
+        .withMessage('image is required')
+    ,
     validatorMiddleware
 ]
 exports.deleteCategoryValidator = [

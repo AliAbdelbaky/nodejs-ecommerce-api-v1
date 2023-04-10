@@ -12,17 +12,18 @@ const {
     updateBrandValidator,
     deleteBrandValidator
 } = require("../../utils/validators/brand")
+const { uploadSingleImage, resizeImageHandler } = require('../../middleware/imageMiddleware');
 
 const router = express.Router()
 
 router
     .route('/')
     .get(getBrandsList)
-    .post(createBrandValidator, createBrand)
+    .post(uploadSingleImage('image'), resizeImageHandler('brand'), createBrandValidator, createBrand)
 router
     .route('/:id')
     .get(getBrandValidator, getBrand)
-    .put(updateBrandValidator, updateBrand)
+    .put(uploadSingleImage('image'), resizeImageHandler('brand'),updateBrandValidator, updateBrand)
     .delete(deleteBrandValidator, deleteBrand)
 
 

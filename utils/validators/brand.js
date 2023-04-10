@@ -23,7 +23,13 @@ const createBrandValidator = [
             req.body.slug = slugify(value)
             return true
         })
-        ,
+    ,
+    check('image')
+        .notEmpty()
+        .withMessage('Image is required')
+        .isString()
+        .withMessage('Image must be a string')
+    ,
     validatorMiddleware
 ]
 const updateBrandValidator = [
@@ -33,6 +39,7 @@ const updateBrandValidator = [
         .isMongoId()
         .withMessage('Invalid brand id'),
     check('name')
+        .optional()
         .notEmpty()
         .withMessage('Name is required')
         .isLength({ min: 3 })
@@ -44,6 +51,12 @@ const updateBrandValidator = [
             return true
         })
     ,
+    check('image')
+        .optional()
+        .notEmpty()
+        .withMessage('Image is required')
+        .isString()
+        .withMessage('Image must be a string'),
     validatorMiddleware
 ]
 const deleteBrandValidator = [

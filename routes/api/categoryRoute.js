@@ -7,7 +7,6 @@ const {
     getCategory,
     updateCategory,
     deleteCategory,
-    uploadCategoryImage
 } = require('../../services/category')
 
 const {
@@ -16,6 +15,8 @@ const {
     updateCategoryValidator,
     deleteCategoryValidator
 } = require('../../utils/validators/category')
+
+const { uploadSingleImage, resizeImageHandler } = require('../../middleware/imageMiddleware');
 
 
 
@@ -28,11 +29,11 @@ router.use('/:categoryId/subcategories', subCategoryRoute)
 router
     .route('/')
     .get(getCategories)
-    .post(uploadCategoryImage, createCategoryValidator, createCategory)
+    .post(uploadSingleImage('image'), resizeImageHandler('category'), createCategoryValidator, createCategory)
 router
     .route('/:id')
     .get(getCategoryValidator, getCategory)
-    .put(updateCategoryValidator, updateCategory)
+    .put(uploadSingleImage('image'), resizeImageHandler('category'), updateCategoryValidator, updateCategory)
     .delete(deleteCategoryValidator, deleteCategory)
 
 
