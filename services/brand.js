@@ -35,16 +35,7 @@ const createBrand = asyncHandler(async (req, res) => {
     res.status(201).json({ data })
 })
 
-const updateBrand = asyncHandler(async (req, res, next) => {
-    const { id } = req.params;
-    const { name } = req.body;
-    const data = await Brand.findByIdAndUpdate({ _id: id }, { name, slug: slugify(name) }, { new: true })
-    if (data === null) {
-        next(new ApiError(`No brand for this id ${id}`, 404))
-        return
-    }
-    res.status(200).json({ data })
-})
+const updateBrand = factory.updateOne(Brand)
 
 const deleteBrand = factory.deleteOne(Brand)
 

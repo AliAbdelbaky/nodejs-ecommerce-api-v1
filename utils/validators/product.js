@@ -1,4 +1,6 @@
 const { check } = require('express-validator')
+const slugify = require('slugify');
+
 const validatorMiddleware = require('../../middleware/validatorMiddleware')
 const Category = require('../../models/category.model')
 const SubCategory = require('../../models/subCategory.model')
@@ -164,7 +166,12 @@ const updateProductValidator = [
         .isLength({ min: 3 })
         .withMessage('title must be at least 3 characters long')
         .isLength({ max: 32 })
-        .withMessage('title must be less than 32 characters long'),
+        .withMessage('title must be less than 32 characters long')
+        .custom((value, { req }) => {
+            req.body.slug = slugify(value)
+            return true
+        })
+    ,
     validatorMiddleware
 ]
 const deleteProductValidator = [

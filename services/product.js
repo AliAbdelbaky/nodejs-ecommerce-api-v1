@@ -3,6 +3,7 @@ const asyncHandler = require('express-async-handler');
 const Product = require('../models/product.model');
 const ApiError = require('../utils/apiError');
 const ApiFeatures = require('../utils/apiFeatures')
+const factory = require('./handlersFactory')
 
 
 
@@ -42,27 +43,9 @@ const createProduct = asyncHandler(async (req, res) => {
     res.status(201).json({ data })
 })
 
-const updateProduct = asyncHandler(async (req, res, next) => {
-    const { id } = req.params;
-    if (req.body.title) {
-        req.body.slug = slugify(req.body.title)
-    }
-    const data = await Product.findByIdAndUpdate({ _id: id }, req.body, { new: true })
-    if (data === null) {
-        next(new ApiError(`No Product for this id ${id}`, 404))
-        return
-    }
-    res.status(200).json({ data })
-})
+const updateProduct = factory.updateOne(Product)
 
-const deleteProduct = asyncHandler(async (req, res, next) => {
-    const { id } = req.params;
-    const data = await Product.findByIdAndDelete({ _id: id })
-    if (data === null) {
-        next(new ApiError(`No Product for this id ${id}`, 404))
-    }
-    res.status(200).json({ data, msg: 'Product deleted sucssefuly' })
-})
+const deleteProduct = factory.deleteOne(Product)
 
 module.exports = {
     getProduct,

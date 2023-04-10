@@ -5,6 +5,7 @@ const asyncHandler = require('express-async-handler')
 const SubCategoryModel = require('../models/subCategory.model')
 const ApiError = require('../utils/apiError')
 const ApiFeatures = require('../utils/apiFeatures')
+const factory = require('./handlersFactory')
 
 const setCategoryIdToBody = (req, res, next) => {
     if (!req.body.category) req.body.category = req.params.categoryId
@@ -56,25 +57,9 @@ const getSubCategory = asyncHandler(async (req, res, next) => {
     res.status(200).json({ data })
 })
 
-const updateSubCategory = asyncHandler(async (req, res, next) => {
-    const { id } = req.params
-    const { name, category } = req.body
+const updateSubCategory = factory.updateOne(SubCategoryModel)
 
-    const data = await SubCategoryModel.findOneAndUpdate({ _id: id }, { name, slug: slugify(name), category }, { new: true })
-    if (data === null) {
-        next(new ApiError(`No sub category for this id ${id}`, 404))
-    }
-    res.status(200).json({ data })
-})
-
-const deleteSubCategory = asyncHandler(async (req, res, next) => {
-    const { id } = req.params
-    const data = await SubCategoryModel.findByIdAndDelete(id)
-    if (data === null) {
-        next(new ApiError(`No sub category for this id ${id}`, 404))
-    }
-    res.status(200).json({ msg: 'deleted sucssefully', data })
-})
+const deleteSubCategory = factory.deleteOne(SubCategoryModel)
 
 module.exports = {
     createSubCategory,
