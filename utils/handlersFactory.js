@@ -28,7 +28,6 @@ const createOne = Model => asyncHandler(async (req, res) => {
     res.status(201).json({ data: document })
 })
 
-
 const getOne = Model => asyncHandler(async (req, res, next) => {
     const document = await Model.findById(req.params.id)
     if (document === null) {
