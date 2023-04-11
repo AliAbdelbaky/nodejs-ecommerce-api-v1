@@ -12,13 +12,14 @@ const {
     updateProductValidator,
     deleteProductValidator
 } = require("../../utils/validators/product")
+const { uploadMixImage, resizeImageHandler } = require('../../middleware/imageMiddleware')
 
 const router = express.Router()
 
 router
     .route('/')
     .get(getProductsList)
-    .post(createProductValidator, createProduct)
+    .post(uploadMixImage('image', 'galary'), resizeImageHandler('product', 'many_single'), createProductValidator, createProduct)
 router
     .route('/:id')
     .get(getProductValidator, getProduct)

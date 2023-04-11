@@ -7,7 +7,21 @@ const asyncHandler = require('express-async-handler');
 const sharp = require('sharp');
 const ApiError = require('../utils/apiError');
 
+const multerOptions = () => {
+    const multerStorage = multer.memoryStorage()
 
+    const multerFilter = (req, file, cb) => {
+        if (file.mimetype.startsWith('image')) {
+            cb(null, true)
+        } else {
+            cb(new ApiError('Only Images allowed', 400), false)
+        }
+    }
+    return {
+        multerStorage,
+        multerFilter
+    }
+}
 const uploadSingleImage = (fieldName) => {
     // 1- DiskStroage engine 
     // const multerStorage = multer.diskStorage({
@@ -23,37 +37,93 @@ const uploadSingleImage = (fieldName) => {
     // })
 
     // 2- Memory Storage engine
-    const multerStorage = multer.memoryStorage()
-
-    const multerFilter = (req, file, cb) => {
-        if (file.mimetype.startsWith('image')) {
-            cb(null, true)
-        } else {
-            cb(new ApiError('Only Images allowed', 400), false)
-        }
-    }
+    const { multerFilter, multerStorage } = multerOptions()
 
     const upload = multer({ storage: multerStorage, fileFilter: multerFilter })
 
     return upload.single(fieldName)
 
 }
+const uploadMixImage = (singleFieldName, manyFieldName, manyCount = 5) => {
 
-const resizeImageHandler = (modelName, w = 600, h = 600, q = 95) => {
+    // 2- Memory Storage engine
+    const { multerFilter, multerStorage } = multerOptions()
 
+
+    const upload = multer({ storage: multerStorage, fileFilter: multerFilter })
+
+    return upload.fields([
+        { name: singleFieldName, maxCount: 1 },
+        { name: manyFieldName, maxCount: manyCount },
+    ])
+
+}
+
+
+
+const resizeImageHandler = (modelName, type = 'single', w = 600, h = 600, q = 95) => {
+    const callbacks = {
+        'single': async (req, res) => {
+            // ${modelName}-${id}-Date.Now().jpeg
+            const filename = `${modelName}-${uuidv4()}-${Date.now()}.jpeg`
+
+            const { file } = req
+
+            if (file) {
+                await sharp(file.buffer)
+                    .resize(w, h)
+                    .toFormat("jpeg")
+                    .jpeg({ quality: q })
+                    .toFile(`uploads/${modelName}/${filename}`);
+                req.body.image = filename
+            }
+        },
+        'many_single': async (req, res) => {
+
+            let singleField = []
+            let manyField = []
+
+            Object.keys(req.files).forEach(key => {
+                if (req.files[key].length === 1) {
+                    singleField = req.files[key]
+                } else {
+                    manyField = req.files[key]
+                }
+            })
+
+            if (singleField.length) {
+                const img = singleField[0]
+                const filename = `${modelName}-${uuidv4()}-${Date.now()}.jpeg`
+
+                await sharp(img.buffer)
+                    .resize(2000, 1333)
+                    .toFormat("jpeg")
+                    .jpeg({ quality: q })
+                    .toFile(`uploads/${modelName}/${filename}`);
+                req.body[img.fieldname] = filename
+
+            }
+            if (manyField.length) {
+                req.body[manyField[0].fieldname] = []
+                await Promise.all(
+                    manyField.map(async (img, index) => {
+                        const filename = `${modelName}-${uuidv4()}-${Date.now()}-${index + 1}.jpeg`
+                        await sharp(img.buffer)
+                            .resize(w, h)
+                            .toFormat("jpeg")
+                            .jpeg({ quality: q })
+                            .toFile(`uploads/${modelName}/${filename}`);
+                        req.body[img.fieldname].push(filename)
+                    })
+                )
+            }
+        },
+    }
     const cb = asyncHandler(async (req, res, next) => {
-        // ${modelName}-${id}-Date.Now().jpeg
-        const filename = `${modelName}-${uuidv4()}-${Date.now()}.jpeg`
-
-        const { file } = req
-
-        if (file) {
-            sharp(file.buffer)
-                .resize(w, h)
-                .toFormat("jpeg")
-                .jpeg({ quality: q })
-                .toFile(`uploads/${modelName}/${filename}`);
-            req.body.image = filename
+        if (['single', 'many_single'].includes(type) && req.files) {
+            await callbacks[type](req, res)
+        } else {
+            console.log('invalid type')
         }
         next()
     })
@@ -63,5 +133,6 @@ const resizeImageHandler = (modelName, w = 600, h = 600, q = 95) => {
 
 module.exports = {
     uploadSingleImage,
-    resizeImageHandler
+    resizeImageHandler,
+    uploadMixImage
 }
