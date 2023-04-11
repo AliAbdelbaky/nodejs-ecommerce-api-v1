@@ -82,48 +82,52 @@ const resizeImageHandler = (modelName, type = 'single', w = 600, h = 600, q = 95
 
             let singleField = []
             let manyField = []
+            const { files } = req
+            if (files) {
 
-            Object.keys(req.files).forEach(key => {
-                if (req.files[key].length === 1) {
-                    singleField = req.files[key]
-                } else {
-                    manyField = req.files[key]
+                Object.keys(req.files).forEach(key => {
+                    if (req.files[key].length === 1) {
+                        singleField = req.files[key]
+                    } else {
+                        manyField = req.files[key]
+                    }
+                })
+
+                if (singleField.length) {
+                    const img = singleField[0]
+                    const filename = `${modelName}-${uuidv4()}-${Date.now()}.jpeg`
+
+                    await sharp(img.buffer)
+                        .resize(2000, 1333)
+                        .toFormat("jpeg")
+                        .jpeg({ quality: q })
+                        .toFile(`uploads/${modelName}/${filename}`);
+                    req.body[img.fieldname] = filename
+
                 }
-            })
-
-            if (singleField.length) {
-                const img = singleField[0]
-                const filename = `${modelName}-${uuidv4()}-${Date.now()}.jpeg`
-
-                await sharp(img.buffer)
-                    .resize(2000, 1333)
-                    .toFormat("jpeg")
-                    .jpeg({ quality: q })
-                    .toFile(`uploads/${modelName}/${filename}`);
-                req.body[img.fieldname] = filename
-
-            }
-            if (manyField.length) {
-                req.body[manyField[0].fieldname] = []
-                await Promise.all(
-                    manyField.map(async (img, index) => {
-                        const filename = `${modelName}-${uuidv4()}-${Date.now()}-${index + 1}.jpeg`
-                        await sharp(img.buffer)
-                            .resize(w, h)
-                            .toFormat("jpeg")
-                            .jpeg({ quality: q })
-                            .toFile(`uploads/${modelName}/${filename}`);
-                        req.body[img.fieldname].push(filename)
-                    })
-                )
+                if (manyField.length) {
+                    req.body[manyField[0].fieldname] = []
+                    await Promise.all(
+                        manyField.map(async (img, index) => {
+                            const filename = `${modelName}-${uuidv4()}-${Date.now()}-${index + 1}.jpeg`
+                            await sharp(img.buffer)
+                                .resize(w, h)
+                                .toFormat("jpeg")
+                                .jpeg({ quality: q })
+                                .toFile(`uploads/${modelName}/${filename}`);
+                            req.body[img.fieldname].push(filename)
+                        })
+                    )
+                }
             }
         },
     }
     const cb = asyncHandler(async (req, res, next) => {
-        if (['single', 'many_single'].includes(type) && req.files) {
+        if (['single', 'many_single'].includes(type)) {
             await callbacks[type](req, res)
         } else {
-            console.log('invalid type')
+            next(new ApiError(`invalid type ${type}`, 400))
+            return
         }
         next()
     })
