@@ -15,7 +15,6 @@ const deleteOne = Model => asyncHandler(async (req, res, next) => {
 
 const updateOne = Model => asyncHandler(async (req, res, next) => {
     const document = await Model.findByIdAndUpdate({ _id: req.params.id }, req.body, { new: true })
-    console.log(document)
     if (document === null) {
         next(new ApiError(`No document for this id ${req.params.id}`, 404))
         return
