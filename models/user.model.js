@@ -1,9 +1,16 @@
 const mongoose = require("mongoose")
+// eslint-disable-next-line import/no-extraneous-dependencies
+const bcrypt = require('bcryptjs')
 
 const userSchema = new mongoose.Schema({
     username: {
         type: String,
         required: [true, 'username is required'],
+        trim: true,
+    },
+    name: {
+        type: String,
+        required: [true, 'name is required'],
         trim: true,
     },
     slug: {
@@ -52,5 +59,10 @@ const setImgURL = (doc) => {
 }
 userSchema.post('init', (doc) => { setImgURL(doc) })
 userSchema.post('save', (doc) => { setImgURL(doc) })
-
+userSchema.pre('save', async function (next) {
+    if (!this.isModified()) return next()
+    // Hashing password
+    this.password = await bcrypt.hash(this.password, 12)
+    next()
+})
 module.exports = mongoose.model("User", userSchema);

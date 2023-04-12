@@ -4,19 +4,23 @@ const {
     getUsersList,
     getUser,
     updateUser,
-    deleteUser
+    deleteUser,
+    changeUserPassword
 } = require('../../services/user')
 const {
     createUserValidator,
     getUserValidator,
     updateUserValidator,
-    deleteUserValidator
+    deleteUserValidator,
+    updateUserPassword
 } = require("../../utils/validators/user")
 
 
 const { uploadSingleImage, resizeImageHandler } = require('../../middleware/imageMiddleware');
 
 const router = express.Router()
+
+router.put('/changePassword/:id', updateUserPassword, changeUserPassword)
 
 router
     .route('/')
