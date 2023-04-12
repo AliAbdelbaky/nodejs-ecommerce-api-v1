@@ -37,9 +37,10 @@ const signup = asyncHandler(async (req, res, next) => {
 const login = asyncHandler(async (req, res, next) => {
 
 
-    // 1 check if password && email || username is valid validation layer
+    // 1 check if password && email || username is valid 
     if (!req.body.email && !req.body.username) {
-        return new ApiError('Please provide email or username', 400)
+        next(new ApiError('Please provide an email or username', 400))
+        return
     }
     // 2 check if password and email is valid and user is authorized
     const findObject = {}
