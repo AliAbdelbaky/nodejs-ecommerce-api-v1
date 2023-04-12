@@ -3,6 +3,7 @@ const subcategoryRouter = require('./api/subcategoryRoute')
 const brandRoute = require('./api/brandRoute')
 const productRoute = require('./api/productRoute')
 const userRoute = require('./api/userRoute')
+const authRoute = require('./api/authRoute')
 
 const baseName = process.env.BASE_ROUTE_NAME
 
@@ -20,6 +21,7 @@ const initRoutes = (app) => {
     app.use(`${baseName}/brand`, brandRoute)
     app.use(`${baseName}/products`, productRoute)
     app.use(`${baseName}/user`, userRoute)
+    app.use(`${baseName}/auth`, authRoute)
 }
 
 module.exports = initRoutes

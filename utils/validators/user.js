@@ -88,6 +88,7 @@ const createUserValidator = [
         })
     ,
     check('image')
+        .optional()
         .notEmpty()
         .withMessage('Image is required')
     ,

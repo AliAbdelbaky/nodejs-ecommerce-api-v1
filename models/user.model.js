@@ -27,12 +27,10 @@ const userSchema = new mongoose.Schema({
     },
     phone: {
         type: String,
-        required: [true, 'phone is required'],
         trim: true,
     },
     image: {
         type: String,
-        required: [true, 'image is required'],
     },
     password: {
         type: String,
