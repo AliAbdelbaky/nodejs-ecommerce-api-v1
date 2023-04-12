@@ -7,11 +7,11 @@ const {
     deleteUser
 } = require('../../services/user')
 const {
-    createBrandValidator,
-    getBrandValidator,
-    updateBrandValidator,
-    deleteBrandValidator
-} = require("../../utils/validators/brand")
+    createUserValidator,
+    getUserValidator,
+    updateUserValidator,
+    deleteUserValidator
+} = require("../../utils/validators/user")
 
 
 const { uploadSingleImage, resizeImageHandler } = require('../../middleware/imageMiddleware');
@@ -21,12 +21,12 @@ const router = express.Router()
 router
     .route('/')
     .get(getUsersList)
-    .post(uploadSingleImage('image'), resizeImageHandler('users'), createUser)
+    .post(uploadSingleImage('image'), resizeImageHandler('users'), createUserValidator, createUser)
 router
     .route('/:id')
-    .get(getUser)
-    .put(uploadSingleImage('image'), resizeImageHandler('users'), updateUser)
-    .delete(deleteUser)
+    .get(getUserValidator, getUser)
+    .put(uploadSingleImage('image'), resizeImageHandler('users'), updateUserValidator, updateUser)
+    .delete(deleteUserValidator, deleteUser)
 
 
 module.exports = router
