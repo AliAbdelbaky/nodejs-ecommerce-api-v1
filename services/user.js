@@ -12,17 +12,17 @@ const ApiError = require('../utils/apiError');
 // @access  Private
 const getUsersList = factory.getAll(User)
 
-// @desc    Get specific brand by id
+// @desc    Get specific user by id
 // @route   GET /api/v1/user/:id
 // @access  Private
 const getUser = factory.getOne(User)
 
-// @desc    Create brand
+// @desc    Create user
 // @route   POST  /api/v1/user
 // @access  Private
 const createUser = factory.createOne(User)
 
-// @desc    Update specific brand
+// @desc    Update specific user
 // @route   PUT /api/v1/user/:id
 // @access  Private
 const updateUser = asyncHandler(async (req, res, next) => {
@@ -36,8 +36,8 @@ const updateUser = asyncHandler(async (req, res, next) => {
     res.status(200).json({ data: document })
 })
 
-// @desc    Update specific brand
-// @route   PUT /api/v1/user/:id
+// @desc    Update specific user
+// @route   PUT /api/v1/user/changePassword/:id
 // @access  Private
 const changeUserPassword = asyncHandler(async (req, res, next) => {
     const document = await User.findByIdAndUpdate({ _id: req.params.id }, { password: await bcrypt.hash(req.body.password, 12) }, { new: true })
@@ -49,7 +49,7 @@ const changeUserPassword = asyncHandler(async (req, res, next) => {
 })
 
 
-// @desc    Delete specific brand
+// @desc    Delete specific user
 // @route   DELETE /api/v1/user/:id
 // @access  Private
 const deleteUser = factory.deleteOne(User)
