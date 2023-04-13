@@ -1,3 +1,5 @@
+const crypto = require('crypto');
+
 const asyncHandler = require('express-async-handler');
 const bcrypt = require('bcryptjs')
 // eslint-disable-next-line import/no-extraneous-dependencies
@@ -65,7 +67,7 @@ const login = asyncHandler(async (req, res, next) => {
 });
 
 
-// @desc    middleware methods to protect the routes 
+// @desc    middleware methods to protect the routes based on token
 const protect = asyncHandler(async (req, res, next) => {
     // 1 check if token exists
     let token = req.headers.authorization
@@ -98,6 +100,8 @@ const protect = asyncHandler(async (req, res, next) => {
     req.user = user;
     next()
 })
+
+// @desc    middleware methods to protect the routes based on given roles
 const allowedTo = (...args) => asyncHandler(async (req, res, next) => {
     // 1 access given args 
     const checkSubset = (parentArray, subsetArray) => subsetArray.every((el) => parentArray.includes(el))
@@ -112,9 +116,33 @@ const allowedTo = (...args) => asyncHandler(async (req, res, next) => {
     next()
 })
 
+
+// @desc    Forgot password 
+// @route   POST  /api/v1/auth/forgotPassword
+// @access  Public
+const forgotPassword = asyncHandler(async (req, res, next) => {
+    // 1 get user by email
+    const user = await User.findOne({ email: req.body.email })
+    if (!user) {
+        return next(new ApiError('User not found', 404))
+    }
+    // 2 generate random 6 digit password OTP and save it to DB
+    const OTP = Math.floor(100000 + Math.random() * 900000).toString();
+    const encryptedOPT = crypto.createHash('sha256').update(OTP).digest('hex')
+    // saved hashed OTP to database
+    user.passwordResetCode = encryptedOPT
+    user.passwordResetExpires = Date.now() + 15 * 60 * 1000 // 15 minutes from now
+    user.passwordResetVerfield = false
+    user.save()
+    // 3 Send OTP code to user via email
+    // 2 check if user exists, Generate random 6 digit password OTP and save it to DB
+    // 3 Send OTP code to user via email
+})
+
 module.exports = {
     signup,
     login,
     protect,
-    allowedTo
+    allowedTo,
+    forgotPassword
 }

@@ -2,7 +2,7 @@ const slugify = require('slugify');
 
 const { check } = require('express-validator')
 const validatorMiddleware = require('../../middleware/validatorMiddleware')
-const User = require("../../models/user.model")
+const { User } = require("../../models/user.model")
 
 
 const signupValidator = [
@@ -66,16 +66,16 @@ const loginValidator = [
         .withMessage('username must be at least 3 characters long')
         .isLength({ max: 32 })
         .withMessage('username must be less than 32 characters long')
-        // .custom(async (value) => {
-        //     const user = await User.findOne({ username: value })
-        //     if (!user) {
-        //         return Promise.reject(new Error('Username already exists'))
-        //     }
-        //     if (/\s/.test(value)) {
-        //         return Promise.reject(new Error('username cannot contain spaces'))
-        //     }
-        //     return true
-        // })
+    // .custom(async (value) => {
+    //     const user = await User.findOne({ username: value })
+    //     if (!user) {
+    //         return Promise.reject(new Error('Username already exists'))
+    //     }
+    //     if (/\s/.test(value)) {
+    //         return Promise.reject(new Error('username cannot contain spaces'))
+    //     }
+    //     return true
+    // })
     ,
     check('email')
         .optional()
@@ -83,13 +83,13 @@ const loginValidator = [
         .withMessage('email is required')
         .isEmail()
         .withMessage('Invalid email')
-        // .custom(async (email) => {
-        //     const user = await User.findOne({ email })
-        //     if (!user) {
-        //         return Promise.reject(new Error('invalid email'));
-        //     }
-        //     return true
-        // })
+    // .custom(async (email) => {
+    //     const user = await User.findOne({ email })
+    //     if (!user) {
+    //         return Promise.reject(new Error('invalid email'));
+    //     }
+    //     return true
+    // })
     ,
     check('password')
         .notEmpty()
