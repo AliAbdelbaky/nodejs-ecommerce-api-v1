@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs')
 
 const { check } = require('express-validator')
 const validatorMiddleware = require('../../middleware/validatorMiddleware')
-const User = require("../../models/user.model")
+const { User, roles } = require("../../models/user.model")
 
 
 const getUserValidator = [
@@ -68,7 +68,7 @@ const createUserValidator = [
     check('role')
         .optional()
         .custom((val, { req }) => {
-            if (!['user', 'admin'].includes(val.trim())) {
+            if (!roles.includes(val.trim())) {
                 return Promise.reject(new Error('Role value must be user or admin'))
             }
             return true
@@ -136,7 +136,7 @@ const updateUserValidator = [
     check('role')
         .optional()
         .custom((val, { req }) => {
-            if (!['user', 'admin'].includes(val.trim())) {
+            if (!roles.includes(val.trim())) {
                 return Promise.reject(new Error('Role value must be user or admin'))
             }
             return true

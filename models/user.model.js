@@ -2,6 +2,8 @@ const mongoose = require("mongoose")
 // eslint-disable-next-line import/no-extraneous-dependencies
 const bcrypt = require('bcryptjs')
 
+const roles = ['user', 'admin']
+
 const userSchema = new mongoose.Schema({
     username: {
         type: String,
@@ -40,7 +42,7 @@ const userSchema = new mongoose.Schema({
     passwordChangedAt: Date,
     role: {
         type: String,
-        enum: ['user', 'admin'],
+        enum: roles,
         default: 'user',
     },
     active: {
@@ -64,4 +66,4 @@ userSchema.pre('save', async function (next) {
     this.password = await bcrypt.hash(this.password, 12)
     next()
 })
-module.exports = mongoose.model("User", userSchema);
+module.exports = { User: mongoose.model("User", userSchema), roles };

@@ -2,7 +2,7 @@ const asyncHandler = require('express-async-handler');
 // eslint-disable-next-line import/no-extraneous-dependencies
 const bcrypt = require('bcryptjs')
 const factory = require('../utils/handlersFactory')
-const User = require('../models/user.model');
+const { User } = require('../models/user.model');
 
 const ApiError = require('../utils/apiError');
 

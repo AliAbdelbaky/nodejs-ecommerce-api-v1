@@ -1,4 +1,8 @@
 const express = require('express')
+
+const { protect, allowedTo } = require('../../services/auth')
+
+
 const {
     createUser,
     getUsersList,
@@ -24,13 +28,13 @@ router.put('/changePassword/:id', updateUserPassword, changeUserPassword)
 
 router
     .route('/')
-    .get(getUsersList)
-    .post(uploadSingleImage('image'), resizeImageHandler('users'), createUserValidator, createUser)
+    .get(protect, allowedTo('user'), getUsersList)
+    .post(protect, allowedTo('user'), uploadSingleImage('image'), resizeImageHandler('users'), createUserValidator, createUser)
 router
     .route('/:id')
-    .get(getUserValidator, getUser)
-    .put(uploadSingleImage('image'), resizeImageHandler('users'), updateUserValidator, updateUser)
-    .delete(deleteUserValidator, deleteUser)
+    .get(protect, allowedTo('user'), getUserValidator, getUser)
+    .put(protect, allowedTo('user'), uploadSingleImage('image'), resizeImageHandler('users'), updateUserValidator, updateUser)
+    .delete(protect, allowedTo('user'), deleteUserValidator, deleteUser)
 
 
 module.exports = router

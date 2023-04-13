@@ -1,4 +1,5 @@
 const express = require('express')
+const { protect, allowedTo } = require('../../services/auth')
 
 const {
     createSubCategory,
@@ -21,13 +22,13 @@ const router = express.Router({ mergeParams: true })
 router
     .route('/')
     .get(getSubCategoriesValidator, getSubCategories)
-    .post(createSubCategoryValidator, createSubCategory)
+    .post(protect, allowedTo('user'), createSubCategoryValidator, createSubCategory)
 
 router
     .route('/:id')
     .get(getSubCategoryValidator, getSubCategory)
-    .put(updateSubCategoryValidator, updateSubCategory)
-    .delete(deleteSubCategoryValidator, deleteSubCategory)
+    .put(protect, allowedTo('user'), updateSubCategoryValidator, updateSubCategory)
+    .delete(protect, allowedTo('user'), deleteSubCategoryValidator, deleteSubCategory)
 
 
 

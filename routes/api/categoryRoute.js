@@ -1,6 +1,6 @@
 const express = require('express')
 
-const { protect } = require('../../services/auth')
+const { protect, allowedTo } = require('../../services/auth')
 const {
     createCategory,
     getCategories,
@@ -29,12 +29,12 @@ router.use('/:categoryId/subcategories', subCategoryRoute)
 router
     .route('/')
     .get(getCategories)
-    .post(protect, uploadSingleImage('image'), resizeImageHandler('category'), createCategoryValidator, createCategory)
+    .post(protect, allowedTo('user', 'admin'), uploadSingleImage('image'), resizeImageHandler('category'), createCategoryValidator, createCategory)
 router
     .route('/:id')
     .get(getCategoryValidator, getCategory)
-    .put(uploadSingleImage('image'), resizeImageHandler('category'), updateCategoryValidator, updateCategory)
-    .delete(deleteCategoryValidator, deleteCategory)
+    .put(protect, allowedTo('user', 'admin'), uploadSingleImage('image'), resizeImageHandler('category'), updateCategoryValidator, updateCategory)
+    .delete(protect, allowedTo('user', 'admin'), deleteCategoryValidator, deleteCategory)
 
 
 module.exports = router 

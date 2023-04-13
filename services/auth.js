@@ -2,7 +2,7 @@ const asyncHandler = require('express-async-handler');
 const bcrypt = require('bcryptjs')
 // eslint-disable-next-line import/no-extraneous-dependencies
 const JWT = require('jsonwebtoken');
-const User = require('../models/user.model');
+const { User, roles } = require('../models/user.model');
 const ApiError = require('../utils/apiError')
 
 const generateToken = (id) => {
@@ -61,10 +61,11 @@ const login = asyncHandler(async (req, res, next) => {
         res.status(401).json({ message: 'Invalid Credentials' });
     }
 
+
 });
 
 
-// @desc    Protect middleware methods to protect the routes 
+// @desc    middleware methods to protect the routes 
 const protect = asyncHandler(async (req, res, next) => {
     // 1 check if token exists
     let token = req.headers.authorization
@@ -81,7 +82,7 @@ const protect = asyncHandler(async (req, res, next) => {
     }
 
     // 3 check if user is authorized
-    const user = await User.findById(decoded.userId).select('-__v')
+    const user = await User.findById(decoded.userId)
     if (!user) {
         return next(new ApiError('This user is unauthorized', 401))
     }
@@ -93,11 +94,27 @@ const protect = asyncHandler(async (req, res, next) => {
             return next(new ApiError('User recently changed his password', 401))
         }
     }
+    // 5 set user to req
+    req.user = user;
+    next()
+})
+const allowedTo = (...args) => asyncHandler(async (req, res, next) => {
+    // 1 access given args 
+    const checkSubset = (parentArray, subsetArray) => subsetArray.every((el) => parentArray.includes(el))
+    if (!checkSubset(roles, args)) {
+        return next(new ApiError(`Invalid given roles: ${args} , available roles: ${roles}`, 400))
+    }
+
+    // 2 check if user has at least one role of given args
+    if (!args.includes(req.user.role)) {
+        return next(new ApiError('Access denied', 403))
+    }
     next()
 })
 
 module.exports = {
     signup,
     login,
-    protect
+    protect,
+    allowedTo
 }
