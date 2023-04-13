@@ -11,7 +11,12 @@ const apiError = (app) => {
         res.status(400).json(response(error))
     })
 }
+// const JwtError = () => 
+
 const response = (error) => {
+    // eslint-disable-next-line no-unused-expressions
+    ['TokenExpiredError', 'JsonWebTokenError'].includes(error.name) ? error = new ApiError('Invalid Authentication Key', 401) : true
+
     let DEFUALT_RES = {
         status: error.status,
         message: error.message,
@@ -23,4 +28,5 @@ const response = (error) => {
 
     return DEFUALT_RES
 }
+
 module.exports = apiError

@@ -40,7 +40,9 @@ const updateUser = asyncHandler(async (req, res, next) => {
 // @route   PUT /api/v1/user/changePassword/:id
 // @access  Private
 const changeUserPassword = asyncHandler(async (req, res, next) => {
-    const document = await User.findByIdAndUpdate({ _id: req.params.id }, { password: await bcrypt.hash(req.body.password, 12) }, { new: true })
+    const document = await User.findByIdAndUpdate({ _id: req.params.id },
+        { password: await bcrypt.hash(req.body.password, 12), passwordChangedAt: Date.now() },
+        { new: true }).select('-__v -passwordChangedAt')
     if (document === null) {
         next(new ApiError(`No document for this id ${req.params.id}`, 404))
         return

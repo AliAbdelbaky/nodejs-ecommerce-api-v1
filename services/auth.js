@@ -50,7 +50,7 @@ const login = asyncHandler(async (req, res, next) => {
         findObject.username = req.body.username
     }
 
-    const user = await User.findOne(findObject)
+    const user = await User.findOne(findObject).select('-__v -passwordChangedAt')
 
     if (user && (await bcrypt.compare(req.body.password, user.password))) {
         // 3 generate the token
@@ -64,7 +64,40 @@ const login = asyncHandler(async (req, res, next) => {
 });
 
 
+// @desc    Protect middleware methods to protect the routes 
+const protect = asyncHandler(async (req, res, next) => {
+    // 1 check if token exists
+    let token = req.headers.authorization
+    if (!token || !token.startsWith(`${process.env.TOKEN_TYPE}`)) {
+        return next(new ApiError('Not authorized to access this route', 401))
+    }
+
+    // 2 verify the token expiration date etc
+    token = token.split(' ')[1]
+    const decoded = JWT.verify(token, process.env.JWT_SECRET)
+
+    if (!decoded) {
+        return next(new ApiError('Invalid token', 401))
+    }
+
+    // 3 check if user is authorized
+    const user = await User.findById(decoded.userId).select('-__v')
+    if (!user) {
+        return next(new ApiError('This user is unauthorized', 401))
+    }
+
+    // 4 check if user changed password after created token
+    if (user.passwordChangedAt) {
+        const passwordTimestamp = parseInt(user.passwordChangedAt.getTime() / 1000, 10)
+        if (passwordTimestamp > decoded.iat) {
+            return next(new ApiError('User recently changed his password', 401))
+        }
+    }
+    next()
+})
+
 module.exports = {
     signup,
-    login
+    login,
+    protect
 }
