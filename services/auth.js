@@ -6,6 +6,7 @@ const bcrypt = require('bcryptjs')
 const JWT = require('jsonwebtoken');
 const { User, roles } = require('../models/user.model');
 const ApiError = require('../utils/apiError')
+const sendEmail = require('../utils/sendEmail');
 
 const generateToken = (id) => {
     const token = JWT.sign({ userId: id }, process.env.JWT_SECRET, {
@@ -38,7 +39,6 @@ const signup = asyncHandler(async (req, res, next) => {
 // @access  Public
 const login = asyncHandler(async (req, res, next) => {
 
-
     // 1 check if password && email || username is valid 
     if (!req.body.email && !req.body.username) {
         next(new ApiError('Please provide an email or username', 400))
@@ -52,8 +52,7 @@ const login = asyncHandler(async (req, res, next) => {
         findObject.username = req.body.username
     }
 
-    const user = await User.findOne(findObject).select('-__v -passwordChangedAt')
-
+    const user = await User.findOne(findObject).select('-__v')
     if (user && (await bcrypt.compare(req.body.password, user.password))) {
         // 3 generate the token
         const token = generateToken(user._id)
@@ -62,8 +61,6 @@ const login = asyncHandler(async (req, res, next) => {
     } else {
         res.status(401).json({ message: 'Invalid Credentials' });
     }
-
-
 });
 
 
@@ -128,15 +125,76 @@ const forgotPassword = asyncHandler(async (req, res, next) => {
     }
     // 2 generate random 6 digit password OTP and save it to DB
     const OTP = Math.floor(100000 + Math.random() * 900000).toString();
-    const encryptedOPT = crypto.createHash('sha256').update(OTP).digest('hex')
+    const encryptedOTP = crypto.createHash('sha256').update(OTP).digest('hex')
     // saved hashed OTP to database
-    user.passwordResetCode = encryptedOPT
+    user.passwordResetCode = encryptedOTP
     user.passwordResetExpires = Date.now() + 15 * 60 * 1000 // 15 minutes from now
     user.passwordResetVerfield = false
-    user.save()
+    await user.save()
     // 3 Send OTP code to user via email
-    // 2 check if user exists, Generate random 6 digit password OTP and save it to DB
-    // 3 Send OTP code to user via email
+    const message = `Hi ${user.name},\nWe received a request to reset your password on your E-shop Acccount.\n${OTP} \n Enter this code to complete the reset.\nThanks for helping us to keep your account secure\nThe E-shop Team`
+    try {
+        await sendEmail({
+            email: user.email,
+            subject: 'Your password reset code is valid for (15 minutes from now)',
+            message
+        })
+    } catch (error) {
+        user.passwordResetCode = undefined
+        user.passwordResetExpires = undefined
+        user.passwordResetVerfield = undefined
+        await user.save()
+        return next(new ApiError('There is an error in sending email', 500))
+    }
+    res.status(200).json({ message: 'OTP sent to your email', status: 'Success' })
+})
+
+// @desc    Verify OTP 
+// @route   POST  /api/v1/auth/verifyOtp
+// @access  Public
+const verifyOTP = asyncHandler(async (req, res, next) => {
+    // 1 get user pased on OTP 
+    const encryptedOTP = crypto.createHash('sha256').update(req.body.otp).digest('hex')
+    const user = await User.findOne({
+        passwordResetCode: encryptedOTP,
+        passwordResetExpires: { $gt: Date.now() }
+    })
+    if (!user) {
+        return next(new ApiError('Invalid OTP', 400))
+    }
+    user.passwordResetVerfield = true
+    await user.save()
+    const token = generateToken(user._id)
+    res.status(200).json({ message: 'OTP verified', status: 'Success', token })
+})
+
+// @desc    Reset password
+// @route   POST  /api/v1/auth/resetPassword
+// @access  Public
+const resetPassword = asyncHandler(async (req, res, next) => {
+
+    if (!req.user.passwordResetVerfield) {
+        return next(new ApiError('Reset Code is not verified', 400))
+    }
+
+    const user = await User.findById({ _id: req.user._id })
+    const isSameOldPassword = await bcrypt.compare(req.body.password, user.password)
+    if (!isSameOldPassword) {
+        user.password = req.body.password
+        user.passwordChangedAt = Date.now()
+        user.passwordResetCode = undefined
+        user.passwordResetExpires = undefined
+        user.passwordResetVerfield = undefined
+
+        await user.save()
+
+        const token = generateToken(user._id)
+        res.status(200).json({ message: 'Password updated', status: 'Success', token })
+    } else {
+        res.status(401).json({ message: 'new Password can not be the same the last password' });
+    }
+
+
 })
 
 module.exports = {
@@ -144,5 +202,7 @@ module.exports = {
     login,
     protect,
     allowedTo,
-    forgotPassword
+    forgotPassword,
+    verifyOTP,
+    resetPassword
 }

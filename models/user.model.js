@@ -63,10 +63,13 @@ const setImgURL = (doc) => {
 }
 userSchema.post('init', (doc) => { setImgURL(doc) })
 userSchema.post('save', (doc) => { setImgURL(doc) })
+
+
 userSchema.pre('save', async function (next) {
-    if (!this.isModified()) return next()
+    if (!this.isModified('password')) return next()
     // Hashing password
     this.password = await bcrypt.hash(this.password, 12)
     next()
 })
+
 module.exports = { User: mongoose.model("User", userSchema), roles };

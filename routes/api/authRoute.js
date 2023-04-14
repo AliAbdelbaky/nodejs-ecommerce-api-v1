@@ -2,7 +2,10 @@ const express = require('express')
 const {
     signup,
     login,
-    forgotPassword
+    forgotPassword,
+    verifyOTP,
+    resetPassword,
+    protect
 } = require('../../services/auth')
 const {
     signupValidator,
@@ -23,6 +26,12 @@ router
 router
     .route('/forgotPassword')
     .post(forgotPassword)
+router
+    .route('/verifyOtp')
+    .post(verifyOTP)
+router
+    .route('/resetPassword')
+    .put(protect, resetPassword)
 
 
 module.exports = router
