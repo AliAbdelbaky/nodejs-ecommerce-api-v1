@@ -1,6 +1,7 @@
 const slugify = require('slugify');
 // eslint-disable-next-line import/no-extraneous-dependencies
 const bcrypt = require('bcryptjs')
+const JWT = require('jsonwebtoken');
 
 const { check } = require('express-validator')
 const validatorMiddleware = require('../../middleware/validatorMiddleware')
@@ -100,6 +101,17 @@ const updateUserValidator = [
         .withMessage('User id is required')
         .isMongoId()
         .withMessage('Invalid User id'),
+    check('name')
+        .optional()
+        .notEmpty()
+        .withMessage('name is required')
+        .custom((value, { req }) => {
+            if (value) {
+                req.body.slug = slugify(value)
+            }
+            return true
+        })
+    ,
     check('username')
         .optional()
         .notEmpty()
@@ -210,10 +222,132 @@ const updateUserPassword = [
     validatorMiddleware
 ]
 
+// logged user 
+const updateLoggedUserPasswordValidator = [
+    check('currentPassword')
+        .notEmpty()
+        .withMessage('Current password is required')
+    ,
+    check('passwordConfirmation')
+        .notEmpty()
+        .withMessage('Password confirmation is required')
+    ,
+    check('password')
+        .notEmpty()
+        .withMessage('password is required')
+        .custom(async (val, { req }) => {
+            const user = await User.findOne({ _id: req.user._id })
+            if (!user) {
+                return Promise.reject(new Error('User not found'))
+            }
+            // invalid current password
+            const isValid = await bcrypt.compare(req.body.currentPassword, user.password)
+            if (!isValid) {
+                return Promise.reject(new Error('Incorrect current password'))
+            }
+            // password !== current password
+            if (val === req.body.currentPassword) {
+                return Promise.reject(new Error('Password cannot be equal to current password'))
+            }
+            // password === confirmation password
+            if (req.body.passwordConfirmation !== val) {
+                return Promise.reject(new Error('Incorrect confirm password'))
+            }
+            return true
+        })
+        .isLength({ min: 6 })
+        .withMessage('password must be at least 6 characters long')
+        .isLength({ max: 32 })
+        .withMessage('password must be less than 32 characters long')
+    ,
+    validatorMiddleware
+]
+const updateLoggedUserValidator = [
+    check('name')
+        .optional()
+        .notEmpty()
+        .withMessage('name is required')
+        .custom((value, { req }) => {
+            if (value) {
+                req.body.slug = slugify(value)
+            }
+            return true
+        })
+    ,
+    check('username')
+        .optional()
+        .notEmpty()
+        .withMessage('username is required')
+        .isLength({ min: 3 })
+        .withMessage('username must be at least 3 characters long')
+        .isLength({ max: 32 })
+        .withMessage('username must be less than 32 characters long')
+        .custom(async (value, { req }) => {
+            const user = await User.findOne({ username: value })
+            const decoded = JWT.verify(req.headers.authorization.split(' ')[1], process.env.JWT_SECRET)
+            const userIdFromToken = decoded.userId
+            // check if username is same as old username
+            // check if username is already in use
+            if (user && userIdFromToken !== user._id.toString()) {
+                return Promise.reject(new Error('Username already exists'))
+            }
+
+            if (/\s/.test(value)) {
+                return Promise.reject(new Error('username cannot contain spaces'))
+            }
+            return true
+        })
+    ,
+    check('email')
+        .optional()
+        .notEmpty()
+        .withMessage('email is required')
+        .isEmail()
+        .withMessage('Invalid email')
+        .custom(async (email, { req }) => {
+            const user = await User.findOne({ email })
+            const decoded = JWT.verify(req.headers.authorization.split(' ')[1], process.env.JWT_SECRET)
+            const userIdFromToken = decoded.userId
+            // check if username is same as old username
+            // check if username is already in use
+            if (user && userIdFromToken !== user._id.toString()) {
+                return Promise.reject(new Error('Email already exists'))
+            }
+            return true
+        })
+    ,
+    check('phone')
+        .optional()
+        .notEmpty()
+        .withMessage('phone is required')
+        .isMobilePhone(['ar-EG', 'ar-SA'])
+        .withMessage('Invalid phone'),
+    check('image')
+        .optional()
+        .notEmpty()
+        .withMessage('Image is required')
+        .isString()
+        .withMessage('Image must be a string')
+    ,
+    validatorMiddleware
+]
+const updateLoggedUserActive = [
+    check('active')
+        .notEmpty()
+        .withMessage('active is required')
+        .isBoolean()
+        .withMessage('active must be a boolean'),
+    validatorMiddleware
+]
+
+
 module.exports = {
     getUserValidator,
     createUserValidator,
     updateUserValidator,
     deleteUserValidator,
-    updateUserPassword
+    updateUserPassword,
+    updateLoggedUserPasswordValidator,
+    updateLoggedUserValidator,
+    updateLoggedUserActive
 }

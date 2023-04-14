@@ -7,13 +7,8 @@ const JWT = require('jsonwebtoken');
 const { User, roles } = require('../models/user.model');
 const ApiError = require('../utils/apiError')
 const sendEmail = require('../utils/sendEmail');
+const generateToken = require('../utils/tokenGenerator');
 
-const generateToken = (id) => {
-    const token = JWT.sign({ userId: id }, process.env.JWT_SECRET, {
-        expiresIn: process.env.JWT_EXPIRE_TIME
-    })
-    return token
-}
 
 // @desc    create user 
 // @route   POST  /api/v1/auth/signup
@@ -81,9 +76,13 @@ const protect = asyncHandler(async (req, res, next) => {
     }
 
     // 3 check if user is authorized
-    const user = await User.findById(decoded.userId)
+    const user = await User.findById(decoded.userId).select('-__v')
     if (!user) {
         return next(new ApiError('This user is unauthorized', 401))
+    }
+    // check if the user active 
+    if (!user.active && req._parsedUrl.path !== '/me/changeActive') {
+        return next(new ApiError('This user is not active, please activate your account', 403))
     }
 
     // 4 check if user changed password after created token
@@ -93,6 +92,7 @@ const protect = asyncHandler(async (req, res, next) => {
             return next(new ApiError('User recently changed his password', 401))
         }
     }
+
     // 5 set user to req
     req.user = user;
     next()

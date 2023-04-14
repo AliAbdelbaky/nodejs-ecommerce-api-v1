@@ -9,14 +9,21 @@ const {
     getUser,
     updateUser,
     deleteUser,
-    changeUserPassword
+    changeUserPassword,
+    getLoggedUser,
+    updateLoggedUserPassword,
+    updateLoggedUserData,
+    deactivateAccount
 } = require('../../services/user')
 const {
     createUserValidator,
     getUserValidator,
     updateUserValidator,
     deleteUserValidator,
-    updateUserPassword
+    updateUserPassword,
+    updateLoggedUserPasswordValidator,
+    updateLoggedUserValidator,
+    updateLoggedUserActive
 } = require("../../utils/validators/user")
 
 
@@ -24,17 +31,26 @@ const { uploadSingleImage, resizeImageHandler } = require('../../middleware/imag
 
 const router = express.Router()
 
-router.put('/changePassword/:id', updateUserPassword, changeUserPassword)
+router.use(protect)
 
+router.get('/me', getLoggedUser, getUser)
+router.put('/me/updatePassword', updateLoggedUserPasswordValidator, updateLoggedUserPassword)
+router.put('/me/updateData', uploadSingleImage('image'), resizeImageHandler('users'), updateLoggedUserValidator, updateLoggedUserData)
+router.put('/me/changeActive', updateLoggedUserActive, deactivateAccount)
+
+router.use(protect, allowedTo('admin'))
+
+router.put('/changePassword/:id', updateUserPassword, changeUserPassword)
 router
     .route('/')
-    .get(protect, allowedTo('user'), getUsersList)
-    .post(protect, allowedTo('user'), uploadSingleImage('image'), resizeImageHandler('users'), createUserValidator, createUser)
+    .get(getUsersList)
+    .post(uploadSingleImage('image'), resizeImageHandler('users'), createUserValidator, createUser)
 router
     .route('/:id')
-    .get(protect, allowedTo('user'), getUserValidator, getUser)
-    .put(protect, allowedTo('user'), uploadSingleImage('image'), resizeImageHandler('users'), updateUserValidator, updateUser)
-    .delete(protect, allowedTo('user'), deleteUserValidator, deleteUser)
+    .get(getUserValidator, getUser)
+    .put(uploadSingleImage('image'), resizeImageHandler('users'), updateUserValidator, updateUser)
+    .delete(deleteUserValidator, deleteUser)
+
 
 
 module.exports = router
