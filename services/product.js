@@ -5,7 +5,7 @@ const Product = require('../models/product.model');
 // @desc    Get specific product by id
 // @route   GET /api/v1/products/:id
 // @access  Public
-const getProduct = factory.getOne(Product)
+const getProduct = factory.getOne(Product, 'reviews')
 
 // @desc    Get list of products
 // @route   GET /api/v1/products
