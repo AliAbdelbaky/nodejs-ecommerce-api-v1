@@ -2,7 +2,7 @@ const mongoose = require("mongoose")
 // eslint-disable-next-line import/no-extraneous-dependencies
 const bcrypt = require('bcryptjs')
 
-const roles = ['user', 'admin']
+const roles = ['user', 'admin', 'manager']
 
 const userSchema = new mongoose.Schema({
     username: {
