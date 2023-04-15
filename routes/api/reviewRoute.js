@@ -11,7 +11,10 @@ const {
     deleteReview
 } = require('../../services/review')
 const {
-    createReviewsValidator
+    createReviewsValidator,
+    updateReviewsValidator,
+    getReviewsValidator,
+    deleteReviewsValidator
 } = require("../../utils/validators/review")
 
 const router = express.Router()
@@ -22,9 +25,9 @@ router
     .post(protect, allowedTo('user'), createReviewsValidator, createReview)
 router
     .route('/:id')
-    .get(getReview)
-    .put(protect, allowedTo('user'), updateReview)
-    .delete(protect, allowedTo('user', 'admin', 'manager'), deleteReview)
+    .get(getReviewsValidator, getReview)
+    .put(protect, allowedTo('user'), updateReviewsValidator, updateReview)
+    .delete(protect, allowedTo('user', 'admin', 'manager'), deleteReviewsValidator, deleteReview)
 
 
 module.exports = router

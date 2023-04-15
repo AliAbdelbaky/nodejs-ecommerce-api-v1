@@ -23,4 +23,17 @@ const reviewSchema = new mongoose.Schema({
     }
 }, { timestamps: true });
 
+// Mongoose Query Middleware
+reviewSchema.pre(/^find/, function (next) {
+    this.populate({
+        path: 'user',
+        select: 'name'
+    })
+    // this.populate({
+    //     path: 'product',
+    //     select: 'title'
+    // })
+    next()
+})
+
 module.exports = mongoose.model('Review', reviewSchema);
