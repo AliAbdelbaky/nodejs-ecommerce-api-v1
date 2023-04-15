@@ -26,12 +26,12 @@ exports.createSubCategoryValidator = [
     ,
     check('categoryId')
         .optional()
+        .isMongoId()
+        .withMessage('invalid category id format')
         .custom((value, { req }) => {
             req.body.category = value
             return true
         })
-        .isMongoId()
-        .withMessage('invalid category id format')
     ,
     validatorMiddleware
 ]

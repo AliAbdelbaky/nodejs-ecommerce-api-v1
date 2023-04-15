@@ -1,6 +1,6 @@
 const express = require('express')
 const { protect, allowedTo } = require('../../services/auth')
-
+const reviewRoute = require('./reviewRoute')
 
 const {
     createProduct,
@@ -18,6 +18,11 @@ const {
 const { uploadMixImage, resizeImageHandler } = require('../../middleware/imageMiddleware')
 
 const router = express.Router()
+// Nested route 
+//  POST list of reviews pased on product id
+//  GET /api/v1/products/:productId/reviews
+//  GET /api/v1/products/:productId/reviews/:reviewsId
+router.use('/:productId/reviews', reviewRoute)
 
 router
     .route('/')

@@ -14,14 +14,15 @@ const {
     createReviewsValidator,
     updateReviewsValidator,
     getReviewsValidator,
-    deleteReviewsValidator
+    deleteReviewsValidator,
+    getListReviewsValidator
 } = require("../../utils/validators/review")
 
-const router = express.Router()
+const router = express.Router({ mergeParams: true })
 
 router
     .route('/')
-    .get(getReviewsList)
+    .get(getListReviewsValidator, getReviewsList)
     .post(protect, allowedTo('user'), createReviewsValidator, createReview)
 router
     .route('/:id')

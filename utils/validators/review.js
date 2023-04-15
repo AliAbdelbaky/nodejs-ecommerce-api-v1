@@ -10,6 +10,15 @@ const createReviewsValidator = [
         .withMessage('description must be at least 3 characters long')
         .isLength({ max: 150 })
         .withMessage('description must be less than 150 characters long'),
+    check('productId')
+        .optional()
+        .isMongoId()
+        .withMessage('invalid category id format')
+        .custom((value, { req }) => {
+            req.body.product = value
+            return true
+        })
+    ,
     check('ratings')
         .notEmpty()
         .withMessage('Ratings is required')
@@ -96,10 +105,22 @@ const deleteReviewsValidator = [
     ,
     validatorMiddleware
 ]
+const getListReviewsValidator = [
+    check('productId')
+        .optional()
+        .isMongoId()
+        .withMessage('invalid product id format')
+        .custom((val, { req }) => {
+            console.log('val', val)
+            req.filterObj = { product: val }
+            return true
+        }),
+]
 
 module.exports = {
     getReviewsValidator,
     createReviewsValidator,
     updateReviewsValidator,
-    deleteReviewsValidator
+    deleteReviewsValidator,
+    getListReviewsValidator
 }
