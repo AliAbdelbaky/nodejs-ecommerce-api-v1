@@ -30,8 +30,7 @@ const updateUser = asyncHandler(async (req, res, next) => {
     delete body.password
     const document = await User.findByIdAndUpdate({ _id: req.params.id }, body, { new: true })
     if (document === null) {
-        next(new ApiError(`No document for this id ${req.params.id}`, 404))
-        return
+        return next(new ApiError(`No document for this id ${req.params.id}`, 404))
     }
     res.status(200).json({ data: document })
 })

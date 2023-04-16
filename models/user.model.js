@@ -51,7 +51,24 @@ const userSchema = new mongoose.Schema({
     active: {
         type: Boolean,
         default: true,
-    }
+    },
+    // child references (on to many)
+    wishlist: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Product'
+        }
+    ],
+    addresses: [
+        {
+            id: { type: mongoose.Schema.Types.ObjectId },
+            alias: { type: String, required: [true, 'alias is required'] },
+            details: { type: String, required: [true, 'details is required'] },
+            phone: { type: String, required: [true, 'phone is required'], trim: true },
+            city: { type: String, required: [true, 'city is required'] },
+            postalCode: { type: String, required: [true, 'postalCode is required'], trim: true }
+        }
+    ]
 }, { timestamps: true });
 
 const setImgURL = (doc) => {

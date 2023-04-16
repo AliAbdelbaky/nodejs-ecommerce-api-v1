@@ -10,6 +10,7 @@ const deleteOne = Model => asyncHandler(async (req, res, next) => {
         next(new ApiError(`No document for this id ${id}`, 404))
         return
     }
+    document.remove()
     res.status(200).json({ document, msg: 'document deleted sucssefuly' })
 })
 
@@ -19,6 +20,7 @@ const updateOne = Model => asyncHandler(async (req, res, next) => {
         next(new ApiError(`No document for this id ${req.params.id}`, 404))
         return
     }
+    document.save()
     res.status(200).json({ data: document })
 })
 

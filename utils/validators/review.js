@@ -96,7 +96,7 @@ const deleteReviewsValidator = [
                 if (!review) {
                     return Promise.reject(new Error('Invalid Reviews id'))
                 }
-                if (review.user.toString() !== req.user._id.toString()) {
+                if (review.user._id.toString() !== req.user._id.toString()) {
                     return Promise.reject(new Error('Your are not allowed to perform this action'))
                 }
             }
