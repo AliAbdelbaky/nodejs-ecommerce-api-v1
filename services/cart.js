@@ -1,5 +1,6 @@
 const asyncHandler = require('express-async-handler');
 const Cart = require('../models/cart.model');
+const Coupon = require('../models/coupon.model');
 const Product = require('../models/product.model');
 const ApiError = require('../utils/apiError')
 
@@ -9,6 +10,7 @@ const calculateTotalPrice = (cart) => {
         totalPrice += item.price * item.quantity
     })
     cart.totalPrice = totalPrice
+    cart.totalPriceAfterDiscount = undefined
 }
 // @desc    add product to cart
 // @route   POST  /api/v1/cart
@@ -59,6 +61,8 @@ const getUserCart = asyncHandler(async (req, res, next) => {
     if (!cart) {
         return next(new ApiError(`There is no cart with id ${req.user._id}`, 404))
     }
+    calculateTotalPrice(cart)
+    await cart.save()
     res.status(200).json({ data: cart, lenght: cart.cartItems.length })
 })
 
@@ -107,12 +111,35 @@ const updateProductQuantity = asyncHandler(async (req, res, next) => {
         return next(new ApiError(`There is no item for this id ${req.params.id}`, 404))
     }
     await cart.save()
-    res.status(200).json({msg:'cart updated successfully'})
+    res.status(200).json({ msg: 'cart updated successfully' })
 })
+
+// @desc    apply coupon on cart
+// @route   POST  /api/v1/cart/applyCoupon
+// @access  Private/user
+const applyCoupon = asyncHandler(async (req, res, next) => {
+    const coupon = await Coupon.findOne({ name: req.body.coupon, expires: { $gt: Date.now() } })
+    if (!coupon) {
+        return next(new ApiError('Invalid coupon', 400))
+    }
+    const cart = await Cart.findOne({ user: req.user._id })
+    const { totalPrice } = cart
+    // calculate total price after coupon
+    const totalPriceAfterDiscount = (totalPrice - (totalPrice * coupon.discount) / 100).toFixed(2)
+    cart.totalPriceAfterDiscount = totalPriceAfterDiscount
+    await cart.save()
+    res.status(200).json({ data: cart })
+})
+
+
+
+
+
 module.exports = {
     addProductToCart,
     getUserCart,
     removeCartItem,
     removeCart,
-    updateProductQuantity
+    updateProductQuantity,
+    applyCoupon
 }

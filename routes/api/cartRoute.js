@@ -8,7 +8,8 @@ const {
     getUserCart,
     removeCartItem,
     removeCart,
-    updateProductQuantity
+    updateProductQuantity,
+    applyCoupon
 } = require('../../services/cart')
 const {
     createCartValidator
@@ -26,6 +27,7 @@ router
     .route('/:id')
     .put(updateProductQuantity)
     .delete(removeCartItem)
+router.post('/applyCoupon', applyCoupon)
 
 
 module.exports = router
