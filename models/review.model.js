@@ -61,8 +61,11 @@ reviewSchema.statics.calc_avg_qq_ratings = async function (productId) {
 reviewSchema.post('save', function () {
     this.constructor.calc_avg_qq_ratings(this.product)
 })
-reviewSchema.post('remove', function () {
+reviewSchema.post('deleteOne', function () {
+    console.log('triggred removed')
     this.constructor.calc_avg_qq_ratings(this.product)
 })
+// reviewSchema.pre('deleteOne')
+
 
 module.exports = mongoose.model('Review', reviewSchema);

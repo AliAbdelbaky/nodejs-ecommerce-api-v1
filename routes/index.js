@@ -7,6 +7,8 @@ const authRoute = require('./api/authRoute')
 const reviewRoute = require('./api/reviewRoute')
 const wishlistRoute = require('./api/wishlistRoute')
 const addressRoute = require('./api/addressRoute')
+const couponRoute = require('./api/couponRoute')
+const cartRoute = require('./api/cartRoute')
 
 const baseName = process.env.BASE_ROUTE_NAME
 
@@ -28,6 +30,8 @@ const initRoutes = (app) => {
     app.use(`${baseName}/reviews`, reviewRoute)
     app.use(`${baseName}/wishlist`, wishlistRoute)
     app.use(`${baseName}/address`, addressRoute)
+    app.use(`${baseName}/coupons`, couponRoute)
+    app.use(`${baseName}/cart`, cartRoute)
 }
 
 module.exports = initRoutes
