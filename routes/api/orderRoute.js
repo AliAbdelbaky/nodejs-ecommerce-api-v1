@@ -9,7 +9,8 @@ const {
     getSingleOrder
 } = require('../../services/order')
 const {
-    getAllCartValidator
+    getAllCartValidator,
+    getSingleOrderValidator
 } = require("../../utils/validators/order")
 
 const router = express.Router()
@@ -21,7 +22,7 @@ router
     .post(allowedTo('user'), createCashOrder)
 router
     .get('/', allowedTo('admin', 'manager', 'user'), getAllCartValidator, getAllOrders)
-    .get('/:id', getSingleOrder)
+    .get('/:id', getSingleOrderValidator, getSingleOrder)
 // router
 //     .route('/:id')
 //     .get(getBrandValidator, getBrand)

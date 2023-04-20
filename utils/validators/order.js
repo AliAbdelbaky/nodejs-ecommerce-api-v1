@@ -13,8 +13,26 @@ const getAllCartValidator = [
     ,
     validatorMiddleware
 ]
+const getSingleOrderValidator = [
+    check('id')
+        .notEmpty()
+        .withMessage('order id is required')
+        .isMongoId()
+        .withMessage('invalid order id'),
+    validatorMiddleware
+]
+// const createOrder = [
+//     check('shippingAddress')
+//         .optional()
+//         .notEmpty()
+//         .withMessage('shipping address is required')
+//         .custom((val) => {
+//             const { details }
+//         })
+// ]
 
 
 module.exports = {
     getAllCartValidator,
+    getSingleOrderValidator
 }
