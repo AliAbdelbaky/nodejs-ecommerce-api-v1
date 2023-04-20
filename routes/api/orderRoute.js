@@ -4,22 +4,24 @@ const { protect, allowedTo } = require('../../services/auth')
 
 
 const {
-    createCashOrder
+    createCashOrder,
+    getAllOrders,
+    getSingleOrder
 } = require('../../services/order')
-// const {
-//     createBrandValidator,
-//     getBrandValidator,
-//     updateBrandValidator,
-//     deleteBrandValidator
-// } = require("../../utils/validators/brand")
-// const { uploadSingleImage, resizeImageHandler } = require('../../middleware/imageMiddleware');
+const {
+    getAllCartValidator
+} = require("../../utils/validators/order")
 
 const router = express.Router()
 
-router.use(protect, allowedTo('user'),)
+router.use(protect)
+
 router
     .route('/')
-    .post(createCashOrder)
+    .post(allowedTo('user'), createCashOrder)
+router
+    .get('/', allowedTo('admin', 'manager', 'user'), getAllCartValidator, getAllOrders)
+    .get('/:id', getSingleOrder)
 // router
 //     .route('/:id')
 //     .get(getBrandValidator, getBrand)

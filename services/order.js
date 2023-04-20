@@ -52,6 +52,16 @@ const createCashOrder = asyncHandler(async (req, res, next) => {
 
     res.status(200).json({ data: order })
 })
+// @desc    get All orders 
+// @route   GET /api/v1/orders
+// @access  Private
+const getAllOrders = factory.getAll(Order)
+
+
+// @desc    get single order 
+// @route   GET /api/v1/orders/:id
+// @access  Private
+const getSingleOrder = factory.getOne(Order)
 
 
 
@@ -61,5 +71,7 @@ const createCashOrder = asyncHandler(async (req, res, next) => {
 
 
 module.exports = {
-    createCashOrder
+    createCashOrder,
+    getAllOrders,
+    getSingleOrder
 }

@@ -108,6 +108,7 @@ const allowedTo = (...args) => asyncHandler(async (req, res, next) => {
 
     // 2 check if user has at least one role of given args
     if (!args.includes(req.user.role)) {
+        console.log(args, req.user.role)
         return next(new ApiError('Access denied', 403))
     }
     next()
