@@ -6,7 +6,9 @@ const { protect, allowedTo } = require('../../services/auth')
 const {
     createCashOrder,
     getAllOrders,
-    getSingleOrder
+    getSingleOrder,
+    updateOrderPaid,
+    updateOrderDeliverd
 } = require('../../services/order')
 const {
     getAllCartValidator,
@@ -23,6 +25,9 @@ router
 router
     .get('/', allowedTo('admin', 'manager', 'user'), getAllCartValidator, getAllOrders)
     .get('/:id', getSingleOrderValidator, getSingleOrder)
+
+router.put('/:id/pay',allowedTo('admin', 'manager'),updateOrderPaid)
+router.put('/:id/deliver',allowedTo('admin', 'manager'),updateOrderDeliverd)
 // router
 //     .route('/:id')
 //     .get(getBrandValidator, getBrand)

@@ -64,7 +64,36 @@ const getAllOrders = factory.getAll(Order)
 const getSingleOrder = factory.getOne(Order)
 
 
+// @desc    update order paid status to true
+// @route   PUT /api/v1/orders/:id/pay
+// @access  Private/Admin-Manager
+const updateOrderPaid = asyncHandler(async (req, res, next) => {
+    const order = await Order.findById(req.params.id)
+    if (!order) {
+        return next(new ApiError(`There is no order with id ${req.params.id}`, 400))
+    }
+    // update order to paid 
+    order.isPaied = true
+    order.paidAt = Date.now()
 
+    const updatedOrder = await order.save()
+    res.status(200).json({ data: updatedOrder })
+})
+// @desc    update order deliverd status to true
+// @route   PUT /api/v1/orders/:id/deliver
+// @access  Private/Admin-Manager
+const updateOrderDeliverd = asyncHandler(async (req, res, next) => {
+    const order = await Order.findById(req.params.id)
+    if (!order) {
+        return next(new ApiError(`There is no order with id ${req.params.id}`, 400))
+    }
+    // update order to paid 
+    order.isDelivered = true
+    order.deliverdAt = Date.now()
+
+    const updatedOrder = await order.save()
+    res.status(200).json({ data: updatedOrder })
+})
 
 
 
@@ -73,5 +102,7 @@ const getSingleOrder = factory.getOne(Order)
 module.exports = {
     createCashOrder,
     getAllOrders,
-    getSingleOrder
+    getSingleOrder,
+    updateOrderPaid,
+    updateOrderDeliverd
 }
