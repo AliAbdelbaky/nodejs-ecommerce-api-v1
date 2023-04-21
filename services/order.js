@@ -1,3 +1,6 @@
+/* eslint-disable import/no-extraneous-dependencies */
+const stripe = require('stripe')(process.env.STRIPE_SECRET);
+
 const asyncHandler = require('express-async-handler');
 const factory = require('../utils/handlersFactory')
 const Order = require('../models/order.model');
@@ -95,6 +98,57 @@ const updateOrderDeliverd = asyncHandler(async (req, res, next) => {
     res.status(200).json({ data: updatedOrder })
 })
 
+// @desc    Get checkout session from stipee and send it as response
+// @route   PUT /api/v1/orders/checkout-session
+// @access  Private/User
+const checkoutSession = asyncHandler(async (req, res, next) => {
+    // app settings
+    const taxPrice = 0;
+    const shippingPrice = 0
+    // 1 - get cart depend on user cart id 
+    const cart = await Cart.findOne({ user: req.user._id })
+    if (!cart) {
+        return next(new ApiError('There is no cart', 404))
+    }
+
+    // 2 - get order total price depend on cart price "if coupon applied"
+    const { totalPriceAfterDiscount, totalPrice } = cart
+    const cartPrice = totalPriceAfterDiscount || totalPrice;
+
+    const totalOrderPrice = (cartPrice + taxPrice + shippingPrice) * 100
+    // 3 create stipe checkout session
+    console.log(cart._id, req.get('host'), totalOrderPrice)
+    const session = await stripe.checkout.sessions.create({
+        line_items: [
+            {
+                // name: req.user.name,
+                // amount: totalOrderPrice,
+                // currency: 'egp',
+                // Provide the exact Price ID (for example, pr_1234) of the product you want to sell
+                // price: '{{PRICE_ID}}',
+                quantity: 1,
+                price_data: {
+                    currency: 'egp',
+                    unit_amount: totalOrderPrice,
+                    product_data: {
+                        name: req.user.name,
+                        // description: 'Comfortable cotton t-shirt',
+                        // images: ['https://example.com/t-shirt.png'],
+                    },
+                },
+            },
+        ],
+        mode: 'payment',
+        success_url: `${req.protocol}://${req.get('host')}/orders`,
+        cancel_url: `${req.protocol}://${req.get('host')}/cart`,
+        customer_email: req.user.email,
+        client_reference_id: cart._id.toString(),
+        metadata: req.body.shippingAddress
+    })
+    // 4 send session to response
+    res.status(200).json({ session })
+})
+
 
 
 
@@ -104,5 +158,6 @@ module.exports = {
     getAllOrders,
     getSingleOrder,
     updateOrderPaid,
-    updateOrderDeliverd
+    updateOrderDeliverd,
+    checkoutSession
 }
