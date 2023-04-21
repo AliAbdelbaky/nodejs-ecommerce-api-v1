@@ -4,6 +4,10 @@ require('colors')
 const express = require('express')
 const dotenv = require('dotenv');
 const morgan = require('morgan');
+// eslint-disable-next-line import/no-extraneous-dependencies
+const cors = require('cors');
+// eslint-disable-next-line import/no-extraneous-dependencies
+const compression = require('compression')
 
 dotenv.config({ path: ".env" })
 //- connect to DB
@@ -16,8 +20,12 @@ const app = express();
 if (process.env.NODE_ENV === 'development') app.use(morgan('dev'))
 app.use(express.json())
 app.use(express.static(path.join(__dirname, 'uploads')))
+// allowing other domains to serve routes
+app.use(cors())
+app.options('*', cors())
 
-
+// compress all responses
+app.use(compression())
 
 
 
