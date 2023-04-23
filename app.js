@@ -8,6 +8,7 @@ const morgan = require('morgan');
 const cors = require('cors');
 // eslint-disable-next-line import/no-extraneous-dependencies
 const compression = require('compression')
+const { webhookCheckout } = require('./services/order')
 
 dotenv.config({ path: ".env" })
 //- connect to DB
@@ -26,6 +27,9 @@ app.options('*', cors())
 
 // compress all responses
 app.use(compression())
+
+// checkout webhook
+app.post('/webhook-checkout', express.raw({ type: 'application/json' }), webhookCheckout)
 
 
 

@@ -98,7 +98,7 @@ const updateOrderDeliverd = asyncHandler(async (req, res, next) => {
     res.status(200).json({ data: updatedOrder })
 })
 
-// @desc    Get checkout session from stipee and send it as response
+// @desc    Get checkout session from stipee and send it as res
 // @route   PUT /api/v1/orders/checkout-session
 // @access  Private/User
 const checkoutSession = asyncHandler(async (req, res, next) => {
@@ -145,8 +145,37 @@ const checkoutSession = asyncHandler(async (req, res, next) => {
         client_reference_id: cart._id.toString(),
         metadata: req.body.shippingAddress
     })
-    // 4 send session to response
+    // 4 send session to res
     res.status(200).json({ session })
+})
+
+const webhookCheckout = asyncHandler(async (req, res, next) => {
+
+    const sig = req.headers['stripe-signature'];
+
+    let event;
+
+    try {
+        event = stripe.webhooks.constructEvent(req.body, sig, process.env.WEBHOOK_SECRET);
+    } catch (err) {
+        return res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+
+    // Handle the event
+    switch (event.type) {
+        case 'checkout.session.completed':
+            console.log('create order here ......')
+            // eslint-disable-next-line no-case-declarations
+            const checkoutSessionCompleted = event.data.object;
+            // Then define and call a function to handle the event checkout.session.completed
+            break;
+        // ... handle other event types
+        default:
+            console.log(`Unhandled event type ${event.type}`);
+    }
+
+    // Return a 200 res to acknowledge receipt of the event
+    res.send();
 })
 
 
@@ -159,5 +188,6 @@ module.exports = {
     getSingleOrder,
     updateOrderPaid,
     updateOrderDeliverd,
-    checkoutSession
+    checkoutSession,
+    webhookCheckout
 }
