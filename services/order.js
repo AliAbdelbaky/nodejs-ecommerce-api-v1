@@ -117,7 +117,6 @@ const checkoutSession = asyncHandler(async (req, res, next) => {
 
     const totalOrderPrice = (cartPrice + taxPrice + shippingPrice) * 100
     // 3 create stipe checkout session
-    console.log(cart._id, req.get('host'), totalOrderPrice)
     const session = await stripe.checkout.sessions.create({
         line_items: [
             {
@@ -162,18 +161,16 @@ const webhookCheckout = asyncHandler(async (req, res, next) => {
     }
 
     // Handle the event
-    switch (event.type) {
-        case 'checkout.session.completed':
-            console.log('create order here ......')
-            // eslint-disable-next-line no-case-declarations
-            const checkoutSessionCompleted = event.data.object;
-            // Then define and call a function to handle the event checkout.session.completed
-            break;
-        // ... handle other event types
-        default:
-            console.log(`Unhandled event type ${event.type}`);
-    }
+    if (event.type === 'checkout.session.completed') {
+        console.log('create order here ......')
+        // eslint-disable-next-line no-case-declarations
+        const checkoutSessionCompleted = event.data.object;
+        console.log(checkoutSessionCompleted)
 
+    } else {
+        console.log(`Unhandled event type ${event.type}`);
+
+    }
     // Return a 200 res to acknowledge receipt of the event
     res.send();
 })
