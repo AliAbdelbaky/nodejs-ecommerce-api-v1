@@ -149,13 +149,19 @@ const checkoutSession = asyncHandler(async (req, res, next) => {
 })
 
 const webhookCheckout = asyncHandler(async (req, res, next) => {
+    req.rawBody = '';
+    req.setEncoding('utf8');
+    req.on('data', (chunk) => {
+        req.rawBody += chunk;
+    });
 
     const sig = req.headers['stripe-signature'];
+
 
     let event;
 
     try {
-        console.log(req.body, sig, process.env.WEBHOOK_SECRET)
+        console.log(req.rawBody, sig, process.env.WEBHOOK_SECRET)
         event = stripe.webhooks.constructEvent(req.rawBody, sig, process.env.WEBHOOK_SECRET);
     } catch (err) {
         return res.status(400).send(`Webhook Error: ${err.message}`);
