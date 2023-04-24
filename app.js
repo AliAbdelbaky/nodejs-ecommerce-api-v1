@@ -10,6 +10,8 @@ const cors = require('cors');
 const compression = require('compression')
 // eslint-disable-next-line import/no-extraneous-dependencies
 const rateLimit = require('express-rate-limit')
+// eslint-disable-next-line import/no-extraneous-dependencies
+const hpp = require('hpp');
 
 const { webhookCheckout } = require('./services/order')
 
@@ -43,9 +45,9 @@ const limiter = rateLimit({
     standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
     legacyHeaders: false, // Disable the `X-RateLimit-*` headers
 })
-
 // Apply the rate limiting middleware to all requests
 app.use('/api', limiter)
+app.use(hpp());
 
 
 
