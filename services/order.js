@@ -206,7 +206,7 @@ const webhookCheckout = asyncHandler(async (req, res, next) => {
 
     }
     // Return a 200 res to acknowledge receipt of the event
-    res.send();
+    res.status(200).send({ received: true });
 })
 
 
