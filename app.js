@@ -30,7 +30,7 @@ app.use(compression())
 // checkout webhook
 app.post('/webhook-checkout', express.raw({ type: 'application/json' }), webhookCheckout)
 
-app.use(express.json())
+app.use(express.json({ limit: "20kb" }))
 
 
 
