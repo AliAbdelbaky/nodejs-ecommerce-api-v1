@@ -9,7 +9,15 @@ const { User } = require('../models/user.model');
 const Product = require('../models/product.model');
 const ApiError = require('../utils/apiError');
 
-
+const BulkProduct = async (cartItems) => {
+    const bulkOptions = cartItems.map((item) => ({
+        updateOne: {
+            filter: { _id: item.product },
+            update: { $inc: { quantity: -item.quantity, sold: +item.quantity } }
+        }
+    }))
+    await Product.bulkWrite(bulkOptions, {})
+}
 // @desc    create cash order 
 // @route   POST /api/v1/orders
 // @access  Private/User
@@ -44,13 +52,7 @@ const createCashOrder = asyncHandler(async (req, res, next) => {
     if (!order) {
         return next(new ApiError('order error', 404))
     }
-    const bulkOptions = cartItems.map((item) => ({
-        updateOne: {
-            filter: { _id: item.product },
-            update: { $inc: { quantity: -item.quantity, sold: +item.quantity } }
-        }
-    }))
-    await Product.bulkWrite(bulkOptions, {})
+    await BulkProduct(cartItems)
     // 5 clear user cart
     await Cart.findOneAndDelete({ user: req.user._id })
 
@@ -175,13 +177,8 @@ const createCardOrder = async (session) => {
         user
     )
     if (!order) return
-    const bulkOptions = cartItems.map((item) => ({
-        updateOne: {
-            filter: { _id: item.product },
-            update: { $inc: { quantity: -item.quantity, sold: +item.quantity } }
-        }
-    }))
-    await Product.bulkWrite(bulkOptions, {})
+
+    await BulkProduct(cartItems)
     // 5 clear user cart
     await Cart.findByIdAndDelete(cardId)
 
