@@ -8,6 +8,11 @@ const morgan = require('morgan');
 const cors = require('cors');
 // eslint-disable-next-line import/no-extraneous-dependencies
 const compression = require('compression')
+// eslint-disable-next-line import/no-extraneous-dependencies
+const rateLimit = require('express-rate-limit')
+// eslint-disable-next-line import/no-extraneous-dependencies
+const hpp = require('hpp');
+
 const { webhookCheckout } = require('./services/order')
 
 dotenv.config({ path: ".env" })
@@ -32,6 +37,17 @@ app.post('/webhook-checkout', express.raw({ type: 'application/json' }), webhook
 
 app.use(express.json({ limit: "20kb" }))
 
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
+    message:
+        'Too many accounts created from this IP, please try again after an hour',
+    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+    legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+})
+// Apply the rate limiting middleware to all requests
+app.use('/api', limiter)
+app.use(hpp({ whitelist: ['price', 'sold', 'quantity', 'ratings'] }));
 
 
 
