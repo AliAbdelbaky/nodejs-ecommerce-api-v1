@@ -20,7 +20,6 @@ dbConnection()
 //- express app
 const app = express();
 if (process.env.NODE_ENV === 'development') app.use(morgan('dev'))
-app.use(express.json())
 app.use(express.static(path.join(__dirname, 'uploads')))
 // allowing other domains to serve routes
 app.use(cors())
@@ -59,6 +58,7 @@ app.post('/webhook-checkout', express.raw({ type: 'application/json' }), (req, r
 });
 
 
+app.use(express.json())
 
 
 // initaite routes
