@@ -5,6 +5,10 @@ const express = require('express')
 const dotenv = require('dotenv');
 const morgan = require('morgan');
 // eslint-disable-next-line import/no-extraneous-dependencies
+const xss = require('xss-clean')
+// eslint-disable-next-line import/no-extraneous-dependencies
+const mongoSanitize = require('express-mongo-sanitize');
+// eslint-disable-next-line import/no-extraneous-dependencies
 const cors = require('cors');
 // eslint-disable-next-line import/no-extraneous-dependencies
 const compression = require('compression')
@@ -34,9 +38,10 @@ app.use(compression())
 
 // checkout webhook
 app.post('/webhook-checkout', express.raw({ type: 'application/json' }), webhookCheckout)
-
+// to apply data santization
 app.use(express.json({ limit: "20kb" }))
-
+app.use(mongoSanitize());
+app.use(xss())
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
