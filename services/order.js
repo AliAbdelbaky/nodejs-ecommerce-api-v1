@@ -5,6 +5,7 @@ const asyncHandler = require('express-async-handler');
 const factory = require('../utils/handlersFactory')
 const Order = require('../models/order.model');
 const Cart = require('../models/cart.model');
+const { User } = require('../models/user.model');
 const Product = require('../models/product.model');
 const ApiError = require('../utils/apiError');
 
@@ -147,7 +148,43 @@ const checkoutSession = asyncHandler(async (req, res, next) => {
     // 4 send session to res
     res.status(200).json({ session })
 })
+const createCardOrder = async (session) => {
+    const cardId = session.client_reference_id
+    const shippingAddress = session.metadata
+    const totalPrice = session.amount_total / 100
 
+    const cart = await Cart.findById(cardId)
+    const DBuser = await User.findOne({ email: session.customer_email })
+
+    const { user, cartItems } = cart
+    const order = await Order.create({
+        user,
+        cartItems,
+        price: totalPrice,
+        shippingAddress: shippingAddress || DBuser.addresses[0] || undefined,
+        isPaied: true,
+        paidAt: Date.now(),
+        paymentType: 'card'
+    })
+    console.log(
+        cardId,
+        shippingAddress,
+        totalPrice,
+        cart,
+        user
+    )
+    if (!order) return
+    const bulkOptions = cartItems.map((item) => ({
+        updateOne: {
+            filter: { _id: item.product },
+            update: { $inc: { quantity: -item.quantity, sold: +item.quantity } }
+        }
+    }))
+    await Product.bulkWrite(bulkOptions, {})
+    // 5 clear user cart
+    await Cart.findByIdAndDelete(cardId)
+
+}
 const webhookCheckout = asyncHandler(async (req, res, next) => {
     const sig = req.headers['stripe-signature'];
 
@@ -155,7 +192,6 @@ const webhookCheckout = asyncHandler(async (req, res, next) => {
     let event;
 
     try {
-        console.log('body =>',req.body);
         event = stripe.webhooks.constructEvent(req.body, sig, process.env.WEBHOOK_SECRET);
     } catch (err) {
         return res.status(400).send(`Webhook Error: ${err.message}`);
@@ -163,10 +199,7 @@ const webhookCheckout = asyncHandler(async (req, res, next) => {
 
     // Handle the event
     if (event.type === 'checkout.session.completed') {
-        console.log('create order here ......')
-        // eslint-disable-next-line no-case-declarations
-        const checkoutSessionCompleted = event.data.object;
-        console.log(checkoutSessionCompleted)
+        createCardOrder(event.data.object)
 
     } else {
         console.log(`Unhandled event type ${event.type}`);
