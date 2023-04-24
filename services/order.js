@@ -150,18 +150,19 @@ const checkoutSession = asyncHandler(async (req, res, next) => {
 })
 const createCardOrder = async (session) => {
     const cardId = session.client_reference_id
-    const shippingAddress = session.metadata
     const totalPrice = session.amount_total / 100
 
     const cart = await Cart.findById(cardId)
     const DBuser = await User.findOne({ email: session.customer_email })
+
+    const shippingAddress = session.metadata.postalCode ? session.metadata : DBuser.addresses[0]
 
     const { user, cartItems } = cart
     const order = await Order.create({
         user,
         cartItems,
         price: totalPrice,
-        shippingAddress: shippingAddress || DBuser.addresses[0] || undefined,
+        shippingAddress: shippingAddress || undefined,
         isPaied: true,
         paidAt: Date.now(),
         paymentType: 'card'
