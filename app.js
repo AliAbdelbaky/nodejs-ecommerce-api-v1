@@ -1,5 +1,4 @@
 const path = require('path');
-const stripe = require('stripe')(process.env.STRIPE_SECRET);
 
 require('colors')
 const express = require('express')
@@ -29,36 +28,11 @@ app.options('*', cors())
 app.use(compression())
 
 // checkout webhook
-app.post('/webhook-checkout', express.raw({ type: 'application/json' }), (req, res) => {
-    const sig = req.headers['stripe-signature'];
-
-
-    let event;
-
-    try {
-        console.log('body =>',req.body);
-        event = stripe.webhooks.constructEvent(req.body, sig, process.env.WEBHOOK_SECRET);
-    } catch (err) {
-        return res.status(400).send(`Webhook Error: ${err.message}`);
-    }
-
-    // Handle the event
-    if (event.type === 'checkout.session.completed') {
-        console.log('create order here ......')
-        // eslint-disable-next-line no-case-declarations
-        const checkoutSessionCompleted = event.data.object;
-        console.log(checkoutSessionCompleted)
-
-    } else {
-        console.log(`Unhandled event type ${event.type}`);
-
-    }
-    // Return a 200 res to acknowledge receipt of the event
-    res.send();
-});
-
+app.post('/webhook-checkout', express.raw({ type: 'application/json' }), webhookCheckout)
 
 app.use(express.json())
+
+
 
 
 // initaite routes
