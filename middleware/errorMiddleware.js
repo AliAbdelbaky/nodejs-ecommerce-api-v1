@@ -1,6 +1,6 @@
 const ApiError = require('../utils/apiError')
 
-const apiError = (app) => {
+const errorMiddleware = (app) => {
     app.all('*', (req, res, next) => {
         next(new ApiError(`Can't find this route: ${req.originalUrl}`, 400))
     })
@@ -29,4 +29,4 @@ const response = (error) => {
     return DEFUALT_RES
 }
 
-module.exports = apiError
+module.exports = errorMiddleware
